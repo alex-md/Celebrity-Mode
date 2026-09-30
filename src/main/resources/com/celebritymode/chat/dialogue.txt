@@ -1,0 +1,376 @@
+# category|composable pattern; context tokens only reference observed state
+social|{greeting} {player}
+social|{player} {request}
+social|{player}, fancy {activity} later?
+social|anyone else only log in to stare at their bank
+social|{player} what are we grinding today
+social|{player} got a clan spot open?
+social|how does everyone have a pet except me
+social|{player}, what's your next {goal}?
+social|i swear i had more gp yesterday
+social|{player} your account is {praise}
+social|{player} been playing long today?
+social|who brought the entire cc
+social|we could probably fill a raid with this crowd
+social|{player}, iron or main?
+social|{player} got any advice for a returning player
+social|i need to stop buying gear and actually use it
+social|{player} what's your favourite boss
+social|{player} are we going for {goal} next?
+social|my collection log is mostly empty boxes
+social|{player}, got a music cape yet?
+social|someone remind me to do my birdhouses
+social|{player} what's your least favourite quest
+social|i was supposed to be doing a farm run
+social|{player}, you reckon i can learn {activity}?
+social|i'm one upgrade away from another excuse
+social|{player} what's the luckiest drop you've had
+social|{player}, how's the collection log looking
+social|my bank is all tabs and no organisation
+social|half this crowd has the same haircut
+social|{player} actually reads the quest dialogue or spacebar?
+social|{player} what was your first 99
+social|one more trip and i'm logging off. probably
+social|{player} what's the dream pet
+social|i'd be productive if bankstanding gave xp
+social|{player} got any good fashionscape tips
+idle|{player} taking a break?
+idle|{player} choosing the next grind?
+idle|anyone got a chair
+idle|{player} even bankstands efficiently
+idle|we've turned this tile into a social hub
+idle|{player} checking the wiki?
+idle|i can wait. my farming timer can't
+idle|{player} we doing something or just vibing
+idle|this is my favourite zero xp method
+idle|{player} afk snack break?
+idle|all this gear and we're just standing here
+idle|{player} planning an inventory in your head?
+idle|i should really go finish my quest
+idle|{player} we're still here btw
+idle|the crowd gets bigger every time i look
+idle|{player} i'll try not to stand on your tile
+walking|{player} where are we headed
+walking|{player} scenic route?
+walking|we're blocking the whole road
+walking|{player} quest trip or bank trip?
+walking|someone's getting lost at the next corner
+walking|{player} i'll follow your route
+walking|this is the strangest group activity i've joined
+walking|{player} saving run for later?
+walking|{player} knows a shortcut. i hope
+walking|walking gives me time to rearrange my inventory
+walking|{player} this is a whole parade now
+walking|who's at the back? wait for them
+walking|{player} any chance we pass a bank
+walking|{player} i recognise this route
+running|{player} wait up
+running|who forgot their stamina pots
+running|{player} making us earn that screenshot
+running|{player} how much run energy have you got
+running|this is cardio with extra steps
+running|{player} i've got graceful in the bank. helpful
+running|{player} we're keeping up, barely
+running|everyone taking a different corner
+running|{player} speedrunning the bank trip
+running|someone at the back is walking already
+running|{player} i'll catch you at the next stop
+running|how are you running in all that gear
+running|{player} leave a breadcrumb pls
+running|my character needs a stamina sponsorship
+running|{player} got somewhere important to be?
+running|this beats another agility lap
+banking|{player} reorganising or gearing up?
+banking|{player} show us the bank tabs
+banking|every trip starts with forgetting something
+banking|{player} what are we withdrawing
+banking|{player} how long does your gear setup take
+banking|bank space is the real endgame
+banking|{player} potion check before you go
+banking|i deposit everything then withdraw half of it again
+banking|{player} got a tab for every boss?
+banking|{player} leave room for loot
+banking|buying more bank space hurts every time
+banking|{player} time to clear the random quest items?
+banking|{player} supplies restock?
+banking|someone explain my own bank tabs to me
+banking|{player} food, pots, teleport. what did we forget
+banking|{player} that junk tab has a story
+banking|i bank for ten minutes to fight for two
+banking|{player} raiding loadout or chill trip?
+banking|don't mind us, just a queue of fans
+banking|{player} don't forget the teleport out
+combat|{player} you've got this
+combat|{player} i'll stay out of the way
+combat|watching this is better than my own trips
+combat|{player} that gear's getting some use
+combat|{player} make it look easy why don't you
+combat|i'm taking notes
+combat|{player} how many trips to learn this
+combat|{player} i'm suddenly glad i'm watching
+combat|{player} do you use hotkeys for everything
+combat|this is a very crowded spectator section
+combat|{player} what's the food budget for this
+combat|{player} any tips for the first attempt?
+combat|i should practice instead of watching
+combat|{player} the whole crowd's rooting for you
+combat|{player} good luck on the trip
+combat|i'd have misclicked by now
+combat_target|{player} vs {target}. front row seats
+combat_target|{player} how many {target} trips have you done
+combat_target|{target} picked the busiest opponent
+combat_target|{player} what's your setup for {target}
+combat_target|{player} i'll watch the {target} fight from here
+combat_target|{target} has a whole audience now
+combat_target|{player} learning {target} or just chilling?
+combat_target|{player} teach me {target} sometime
+combat_target|i came for a screenshot, stayed for {target}
+combat_target|{player} got any {target} advice?
+low_health|{player} food check
+low_health|{player} that hp is making me nervous
+low_health|{player} you still got food?
+low_health|my palms are sweating and i'm not even fighting
+low_health|{player} don't risk the screenshot for this
+low_health|{player} watch your hp
+low_health|{player} please tell me there's food left
+low_health|the crowd is collectively holding its breath
+gear|{player} that {gear} is {praise}
+gear|{player} how long did that {gear} take
+gear|{player} nice {gear}
+gear|{player} is the {gear} worth saving for?
+gear|{player} lending the {gear}? kidding. mostly
+gear|{player} how does the {gear} feel to use
+gear|{player} the {gear} fits the look
+gear|{player} upgrade goals right there
+gear_change|{player} switched to the {gear}, i see you
+gear_change|{player} new setup for the next trip?
+gear_change|{player} brought out the {gear}
+gear_change|{player} gear swap spotted
+gear_change|{player} what's the plan with that {gear}
+gear_change|{player} changing the loadout?
+gear_change|the {gear} has entered the chat
+gear_change|{player} that swap was {praise}
+skilling|{player} on the {skill} grind
+skilling|{player} what's your {skill} goal
+skilling|{player} is this your favourite {skill} method?
+skilling|{player} making progress while we talk
+skilling|{player} i should be training {skill} too
+skilling|{player} how's {skill} going today
+skilling|{player} keeping the xp moving
+skilling|{player} got any {skill} tips?
+skilling|{player} chill grind or trying to be efficient?
+skilling|{player} i respect the patience
+skilling|{player} making {skill} look less painful
+skilling|{player} getting some {skill} in between trips?
+skilling|{player} {level} {skill}, nice
+skilling|{player} another {xp} {skill} xp, keep it going
+skilling|{player} what's the next unlock in {skill}
+skilling|{player} going for a level or just stocking up?
+woodcutting|{player} saving the logs or dropping them?
+woodcutting|{player} forestry with a whole audience
+woodcutting|{player} the tree has more fans than branches
+woodcutting|{player} hoping for the beaver?
+woodcutting|{player} this is a good grind for a chat
+woodcutting|{player} how many logs until a break
+woodcutting|{player} that axe is earning its keep
+woodcutting|{player} woodcutting soundtrack is just chop chop
+mining|{player} banking the ore?
+mining|{player} pickaxe putting in work
+mining|{player} how do you make mining look relaxing
+mining|{player} hoping for the rock golem?
+mining|{player} i can feel my wrist watching this
+mining|{player} motherlode later or staying here?
+mining|{player} one rock and an entire crowd
+mining|{player} what's your favourite mining method
+fishing|{player} saving dinner for the whole crowd?
+fishing|{player} going for the heron?
+fishing|{player} fishing is basically group therapy
+fishing|{player} i'll bring the cooking supplies
+fishing|{player} food for the next boss trip?
+fishing|{player} banking or dropping the catch
+fishing|{player} i always lose the spot while checking chat
+fishing|{player} this looks like a comfy grind
+cooking|{player} the crowd's getting hungry
+cooking|{player} cooking supplies for later?
+cooking|{player} any spare dinner
+cooking|{player} meal prep for the next trip
+cooking|{player} cooking cape plans?
+cooking|{player} i'm banned from the kitchen in real life
+cooking|{player} all this food and i still forget to bring it
+cooking|{player} save some for the fans
+smithing|{player} that anvil has an audience
+smithing|{player} bars into xp, love to see it
+smithing|{player} gearing up the entire crowd?
+smithing|{player} foundry later?
+smithing|{player} i should use the bars in my bank
+smithing|{player} what are you making today
+smithing|{player} smithing looks better than sorting my bank
+smithing|{player} keep the hammer going
+crafting|{player} bankstanding with actual progress
+crafting|{player} crafting cape for the teleport?
+crafting|{player} making your own supplies?
+crafting|{player} i have a bank tab full of unfinished projects
+crafting|{player} how expensive is this method
+crafting|{player} the crowd's your quality control
+crafting|{player} crafting is dangerous for my cash stack
+crafting|{player} this is what productive bankstanding looks like
+fletching|{player} arrows for later or just xp?
+fletching|{player} fletching while we chat, efficient
+fletching|{player} how many bolts is enough bolts
+fletching|{player} my fingers hurt just watching
+fletching|{player} bankstanding with a purpose
+fletching|{player} the crowd can count the feathers
+fletching|{player} stocking up for ranged?
+fletching|{player} fletching cape soon?
+herblore|{player} potions for the next trip?
+herblore|{player} the herb tab finally getting used
+herblore|{player} every potion is one less excuse
+herblore|{player} how's the ingredient bill
+herblore|{player} i always run out of secondaries first
+herblore|{player} save a stamina for the crowd
+herblore|{player} is this worth doing yourself?
+herblore|{player} the bank smells like unfinished potions
+agility|{player} one lap at a time
+agility|{player} how do you stay motivated for agility
+agility|{player} hoping for the squirrel?
+agility|{player} i came to watch and somehow got exercise
+agility|{player} graceful plans or already done?
+agility|{player} agility with spectators is less lonely
+agility|{player} at least the run energy gets better
+agility|{player} another lap, another excuse to postpone mine
+thieving|{player} i'll pretend i didn't see that
+thieving|{player} the least discreet crowd imaginable
+thieving|{player} subtle. very subtle
+thieving|{player} hoping for the rocky pet?
+thieving|{player} we are terrible lookouts
+thieving|{player} my coin pouch is mostly crumbs
+thieving|{player} going for a level or gp?
+thieving|{player} nobody saw anything. except all of us
+runecraft|{player} the rune grind continues
+runecraft|{player} hoping for the rift guardian?
+runecraft|{player} pouches doing overtime
+runecraft|{player} i'll stop complaining about my own grind
+runecraft|{player} gotr later?
+runecraft|{player} runes for yourself or selling them
+runecraft|{player} runecraft cape is a commitment
+runecraft|{player} full inventory, empty patience
+construction|{player} the house is getting an audience
+construction|{player} upgrades for the house?
+construction|{player} my house has a chair and regret
+construction|{player} planks disappear so fast
+construction|{player} max house plans?
+construction|{player} this crowd needs a bigger room
+construction|{player} the butler deserves a pay rise
+construction|{player} how much did those supplies cost
+farming|{player} farm run with an entourage
+farming|{player} hoping for the tangleroot?
+farming|{player} crop check before the next trip
+farming|{player} i forgot my seeds again
+farming|{player} herb patches paying the supply bill?
+farming|{player} did you bring the compost
+farming|{player} farming timers decide my entire evening
+farming|{player} looking after the patches while we follow
+hunter|{player} the crowd is probably scaring everything
+hunter|{player} hunter with this many witnesses
+hunter|{player} hoping for the baby chinchompa?
+hunter|{player} i'll stand away from the traps
+hunter|{player} got any hunter tips
+hunter|{player} rumours later?
+hunter|{player} birdhouses are my entire hunter strategy
+hunter|{player} how many traps are we watching
+prayer|{player} prayer levels are worth the investment
+prayer|{player} going for a prayer unlock?
+prayer|{player} my bone stack always looks bigger in the bank
+prayer|{player} supplies disappearing into levels
+prayer|{player} what prayer level are you aiming for
+prayer|{player} this is one expensive crowd gathering
+magic|{player} magic training between trips?
+magic|{player} that rune stack won't use itself
+magic|{player} alching or something more interesting?
+magic|{player} my spellbook is mostly teleports
+magic|{player} got a magic level goal?
+magic|{player} spellcasting with a live audience
+slayer|{player} how's the slayer task going
+slayer|{player} task grind with spectators
+slayer|{player} what's your favourite task
+slayer|{player} i still need to sort my block list
+slayer|{player} got enough supplies for the task?
+slayer|{player} slayer cape is such a long road
+sailing|{player} sailing progress, nice
+sailing|{player} how's the sailing grind treating you
+sailing|{player} i'm still getting my bearings
+sailing|{player} got any sailing tips
+quiet|{player} gl on the grind
+quiet|{player} nice to see you around
+quiet|good spot for a break
+quiet|{player} don't mind me watching
+quiet|i'll stay out of the way
+quiet|{player} hope the session goes well
+quiet|{player} taking notes quietly
+quiet|just enjoying the scenery
+excited|{greeting} it's {player}
+excited|{player} i actually caught you online
+excited|{player} the cc won't believe this
+excited|{player} i've seen you around before
+excited|{player} this made my session
+excited|{player} got a second to say hi?
+excited|{player} let me get my clan over here
+excited|{player} the timing is perfect
+beggar|{player} any spare {supply}?
+beggar|{player} got a budget version of your setup?
+beggar|{player} how do you fund all the supplies
+beggar|{player} carry me through {activity} sometime
+beggar|{player} got any money making tips
+beggar|{player} i accept payment in advice
+beggar|{player} one {supply} and i'll stop asking
+beggar|{player} my rebuild is mostly excuses
+beggar|{player} if advice was gp i'd be rich
+beggar|{player} {request}, i'm desperate
+memer|{player} found before i finished my farm run
+memer|my quest cape is in another bank tab
+memer|{player} has more followers than my clan has members
+memer|{player} carrying the group's entire motivation
+memer|my biggest drop today was my run energy
+memer|{player} account looking {praise}, bank looking classified
+memer|we are the random event now
+memer|{player} i'm calling this a group ironman activity
+memer|this crowd is a mobile bankstanding community
+memer|{player} no pressure, just a whole audience
+memer|my strategy is click and hope
+memer|{player} i was productive before this parade
+screenshotter|{player} one screenshot before you go
+screenshotter|{player} stand still for half a second pls
+screenshotter|{player} the crowd won't fit in the picture
+screenshotter|{player} i forgot to hide the interface
+screenshotter|{player} screenshot for the cc?
+screenshotter|{player} someone walked in front of the picture
+screenshotter|{player} say hi to my clan
+screenshotter|{player} one pic then i'll let you grind
+screenshotter|{player} best accidental photo op today
+screenshotter|{player} the clan chat needs proof
+hypeman|{player} the account is {praise}
+hypeman|{player} keep the grind going
+hypeman|{player} whole crowd backing you
+hypeman|{player} that's dedication
+hypeman|{player} i respect the effort
+hypeman|{player} you make me want to train my account
+hypeman|{player} the grind pays off eventually
+hypeman|{player} good luck on the next {goal}
+hypeman|{player} that's the energy we needed
+hypeman|{player} {praise} session so far
+level|gz {player}, {level} {skill}!
+level|{player} {level} {skill}, let's go
+level|{player} another {skill} level down
+level|{player} huge {skill} progress
+level|{player} {level} already? gz
+level|{player} the {skill} grind paid off
+level|{player} next {skill} unlock getting closer
+level|{player} gz on {level}, crowd celebration time
+firemaking|{player} lighting up the place
+firemaking|{player} the crowd brought no marshmallows
+firemaking|{player} wintertodt later?
+firemaking|{player} all those logs finally getting used
+firemaking|{player} firemaking with an audience
+firemaking|{player} warming up before the next grind?
+firemaking|{player} what's the firemaking goal
+firemaking|{player} the fans are keeping a safe distance
