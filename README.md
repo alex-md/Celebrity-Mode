@@ -1,5 +1,7 @@
 # Celebrity Mode
 
+![Celebrity Mode — your personal fan club](docs/images/celebrity-mode-banner.png)
+
 A RuneLite novelty plugin that surrounds your character with 1–30 simulated fans. Fans are independent cosmetic scene objects: other players cannot see them, and they cannot click, move your character, send chat, interact with objects, or change real player/NPC collections.
 
 ## Features
@@ -10,6 +12,20 @@ A RuneLite novelty plugin that surrounds your character with 1–30 simulated fa
 - Constant crowd chatter with an extreme Spam setting, optional simulated usernames, rare stationary waves/cheers, level and death reactions, and a rate-limited recognition burst.
 - Gradual, accelerating arrivals from nearby tiles on login, enable, or relocation. Runtime resizing and settings changes; followers retain their positions and route across ordinary region loading; true teleports, plane changes, world-view changes, hopping, and logout start a fresh arrival.
 - An optional debug overlay showing breadcrumbs, targets, IDs, formation slots, state, and target distance.
+
+## Screenshots
+
+Fans gather around your character and display local overhead dialogue.
+
+![A crowd of fans at Varrock West Bank](docs/images/fans-at-varrock.png)
+
+![Fans chatting on the roof of Lumbridge Castle](docs/images/fans-at-lumbridge.png)
+
+## Installation
+
+Celebrity Mode has been prepared for Plugin Hub submission. Availability in RuneLite depends on review and approval by the RuneLite maintainers. Once approved, open RuneLite's **Plugin Hub**, search for **Celebrity Mode**, and click **Install**.
+
+For local development before approval, follow the build and run instructions below.
 
 ## Settings
 
