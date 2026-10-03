@@ -43,20 +43,33 @@ public class CrowdArrivalTest {
             assertEquals(due + 5000, CrowdArrival.dueTick(5000, ordinal));
             assertTrue(due > CrowdArrival.dueTick(0, 0));
             jitters.add(jitter);
-            if (ordinal >= 15) lateTicks.add(due);
+            if (ordinal >= 15 && ordinal < 30) lateTicks.add(due);
         }
         assertTrue("Varied reaction delays", jitters.size() >= 4);
         assertTrue("Compounding final wave includes shared ticks", lateTicks.size() < 15);
     }
 
     @Test
+    public void largerCrowdsAndArrivalPacesStayBounded() {
+        int last = CrowdArrival.dueTick(0, CrowdArrival.MAX_FANS - 1);
+        assertTrue(last > CrowdArrival.dueTick(0, 29));
+        assertTrue("100 fans arrive within 75 seconds", last < 125);
+        for (int i = 0; i < CrowdArrival.MAX_FANS; i++) {
+            assertEquals(200, ArrivalPace.INSTANT.dueTick(200, i));
+            int quick = ArrivalPace.QUICK.dueTick(200, i);
+            assertTrue(quick > 200 && quick <= 232);
+            assertEquals(CrowdArrival.dueTick(200, i), ArrivalPace.GRADUAL.dueTick(200, i));
+        }
+    }
+
+    @Test
     public void rejectsOrdinalsOutsideTheCrowdLimit() {
-        for (int ordinal : new int[] {-1, 30, Integer.MAX_VALUE}) {
+        for (int ordinal : new int[] {-1, CrowdArrival.MAX_FANS, Integer.MAX_VALUE}) {
             try {
                 CrowdArrival.dueTick(0, ordinal);
                 fail("Accepted invalid ordinal " + ordinal);
             } catch (IllegalArgumentException expected) {
-                assertTrue(expected.getMessage().contains("0 and 29"));
+                assertTrue(expected.getMessage().contains("0 and " + (CrowdArrival.MAX_FANS - 1)));
             }
         }
     }

@@ -31,7 +31,7 @@ public class FormationPlanner {
             int dy,
             MovementTrail trail,
             Set<WorldPoint> reserved) {
-        int spread = Math.max(1, Math.min(4, config.maxSpread()));
+        int spread = Math.max(1, Math.min(8, config.maxSpread()));
         FormationStyle style = config.formationStyle();
         int delay =
                 style == FormationStyle.TRAIL
@@ -85,7 +85,10 @@ public class FormationPlanner {
     public WorldPoint chooseIdleTarget(
             FanEntity fan, WorldPoint player, Set<WorldPoint> reserved, Random random, int tick) {
         if (fan.state == com.celebritymode.fan.FanState.REACTION) return fan.position;
-        int radius = Math.max(2, Math.min(3, config.maxSpread() + 1));
+        // Large crowds need room to gather; small crowds retain the original close radius.
+        int crowdSize = Math.max(1, Math.min(com.celebritymode.fan.CrowdArrival.MAX_FANS, config.crowdSize()));
+        int crowdRadius = crowdSize > 30 ? (int) Math.ceil(Math.sqrt(crowdSize / Math.PI)) : 2;
+        int radius = Math.max(crowdRadius, Math.max(2, Math.min(8, config.maxSpread() + 1)));
         if (fan.idleTarget != null
                 && fan.idleTarget.distanceTo(player) <= radius
                 && collision.canOccupy(fan.idleTarget)

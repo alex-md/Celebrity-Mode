@@ -16,7 +16,7 @@ public class FanManagerTest {
     @Test
     public void sizesResizeAndCleanShutdown() {
         TestScene scene = new TestScene();
-        for (int size : new int[] {1, 8, 30, 8, 1}) {
+        for (int size : new int[] {1, 8, 30, 60, 100, 8, 1}) {
             scene.config.size = size;
             scene.populate();
             assertEquals(size, scene.active.size());
@@ -26,6 +26,37 @@ public class FanManagerTest {
         assertTrue(scene.active.isEmpty());
         assertTrue(scene.manager.getFans().isEmpty());
         assertNull(scene.manager.getView());
+    }
+
+    @Test
+    public void hiddenCrowdUnregistersObjectsAndReturnsWithSavedSettings() {
+        TestScene scene = new TestScene();
+        scene.config.size = 100;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        assertEquals(100, scene.active.size());
+        int builds = scene.modelBuilds;
+        scene.config.show = false;
+        scene.manager.onConfigChanged("showCrowd");
+        assertTrue(scene.active.isEmpty());
+        for (int i = 0; i < 10; i++) {
+            scene.tick();
+            scene.manager.onClientTick();
+            assertTrue(scene.active.isEmpty());
+        }
+        scene.config.size = 60;
+        scene.manager.onConfigChanged("crowdSize");
+        assertEquals(60, scene.manager.getFans().size());
+        scene.config.show = true;
+        scene.manager.onConfigChanged("showCrowd");
+        scene.tick();
+        assertEquals(60, scene.active.size());
+        assertEquals("Hiding preserves the models", builds, scene.modelBuilds);
+        scene.config.size = Integer.MAX_VALUE;
+        scene.manager.onConfigChanged("crowdSize");
+        assertEquals(CrowdArrival.MAX_FANS, scene.manager.getFans().size());
+        scene.manager.cleanup();
+        assertTrue(scene.active.isEmpty());
     }
 
     @Test
@@ -297,6 +328,38 @@ public class FanManagerTest {
             assertTrue(fan.position.distanceTo(scene.playerPosition) <= 3);
         scene.manager.cleanup();
         assertTrue(scene.active.isEmpty());
+    }
+
+    @Test
+    public void hundredFansMoveAndGatherAcrossAllFormations() {
+        for (FormationStyle style : FormationStyle.values()) {
+            TestScene scene = new TestScene();
+            scene.config.size = 100;
+            scene.config.arrival = ArrivalPace.INSTANT;
+            scene.config.formation = style;
+            scene.populate();
+            for (int x = 35; x < 45; x++) scene.flags[x][43] = CollisionDataFlag.BLOCK_MOVEMENT_FULL;
+            for (int tick = 0; tick < 60; tick++) {
+                int direction = tick % 20 < 10 ? 1 : -1;
+                scene.playerPosition = FormationPlanner.offset(scene.playerPosition, direction, 0);
+                scene.tick();
+                scene.manager.onClientTick();
+                assertEquals("Active fans in " + style, 100, scene.active.size());
+                assertTrue(scene.manager.getBreadcrumbs().size() <= 80);
+                for (FanEntity fan : scene.manager.getFans())
+                    assertTrue(scene.collision.canOccupy(fan.position));
+            }
+            for (int i = 0; i < 60; i++) scene.tick();
+            assertEquals(100, scene.modelBuilds);
+            Set<WorldPoint> occupied = new HashSet<>();
+            for (FanEntity fan : scene.manager.getFans()) {
+                assertTrue(fan.position.distanceTo(scene.playerPosition) <= 6);
+                occupied.add(fan.position);
+            }
+            assertTrue("Larger crowds spread beyond the old close radius", occupied.size() > 30);
+            scene.manager.cleanup();
+            assertTrue(scene.active.isEmpty());
+        }
     }
 
     @Test

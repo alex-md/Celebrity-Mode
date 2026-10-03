@@ -106,6 +106,10 @@ public final class FanManager {
 
     public void onGameTick(Player player) {
         tick++;
+        if (!config.showCrowd()) {
+            if (view != null) resetScene();
+            return;
+        }
         if (client.getGameState() == GameState.LOADING) {
             suspendScene();
             return;
@@ -181,7 +185,7 @@ public final class FanManager {
             for (int i = 0; i < fans.size(); i++) {
                 FanEntity fan = fans.get(i);
                 fan.arrived = false;
-                fan.arrivalTick = CrowdArrival.dueTick(tick, i);
+                fan.arrivalTick = config.arrivalPace().dueTick(tick, i);
             }
         boolean stopped = stationaryTicks >= 2;
         Set<WorldPoint> reserved = new HashSet<>();
@@ -281,6 +285,10 @@ public final class FanManager {
     }
 
     public void onClientTick() {
+        if (!config.showCrowd()) {
+            if (view != null) resetScene();
+            return;
+        }
         Player player = client.getLocalPlayer();
         if (client.getGameState() == GameState.LOADING) {
             suspendScene();
@@ -335,7 +343,7 @@ public final class FanManager {
                             name,
                             1 + random.nextInt(10),
                             random.nextInt(3) - 1));
-            fans.get(fans.size() - 1).arrivalTick = CrowdArrival.dueTick(tick, arrivalOrdinal++);
+            fans.get(fans.size() - 1).arrivalTick = config.arrivalPace().dueTick(tick, arrivalOrdinal++);
         }
         formations.reassignSlots(fans);
     }
@@ -351,6 +359,9 @@ public final class FanManager {
 
     public void onConfigChanged(String key) {
         switch (key) {
+            case "showCrowd":
+                if (!config.showCrowd()) resetScene();
+                break;
             case "crowdSize":
                 resizeCrowd(config.crowdSize());
                 break;
@@ -385,13 +396,13 @@ public final class FanManager {
     }
 
     public void reactLevel(Skill skill, int level) {
-        if (!config.reactToEvents() || tick - lastEventReaction < 3) return;
+        if (!config.showCrowd() || !config.reactToEvents() || tick - lastEventReaction < 3) return;
         lastEventReaction = tick;
         chat.level(fans, tick, skill, level);
     }
 
     public void react(boolean death) {
-        if (!config.reactToEvents() || tick - lastEventReaction < 3) return;
+        if (!config.showCrowd() || !config.reactToEvents() || tick - lastEventReaction < 3) return;
         lastEventReaction = tick;
         chat.react(
                 fans,

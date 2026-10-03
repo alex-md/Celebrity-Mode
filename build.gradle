@@ -72,3 +72,11 @@ tasks.register('shadowJar', Jar) {
 	archiveClassifier.set('shadow')
 	archiveFileName.set("${rootProject.name}-${project.version}-all.jar")
 }
+
+// Render the real sidebar with RuneLite's look and feel for layout review.
+tasks.register('previewSidebar', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.celebritymode.ui.SidebarPreview'
+    jvmArgs '-Djava.awt.headless=true'
+}

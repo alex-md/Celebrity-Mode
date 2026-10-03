@@ -221,14 +221,22 @@ public final class TestScene {
     }
 
     public void populate() {
-        for (int i = 0; i < 90; i++) tick();
+        for (int i = 0; i < 130; i++) tick();
     }
 
     public static final class MutableConfig implements CelebrityModeConfig {
         public int size = 8;
+        public boolean show = true;
+        public com.celebritymode.fan.ArrivalPace arrival = com.celebritymode.fan.ArrivalPace.GRADUAL;
         public FormationStyle formation = FormationStyle.ENTOURAGE;
         public boolean space = true;
         public FanGearTier gear = FanGearTier.DEFAULT_BOB;
+
+        @Override
+        public boolean showCrowd() { return show; }
+
+        @Override
+        public com.celebritymode.fan.ArrivalPace arrivalPace() { return arrival; }
 
         @Override
         public int crowdSize() {

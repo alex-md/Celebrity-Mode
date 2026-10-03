@@ -2,10 +2,10 @@ package com.celebritymode.fan;
 
 /**
  * Word-of-mouth fan arrivals in OSRS game ticks (600ms). A spotter alerts two friends, then
- * branching waves build the full 30-fan crowd over roughly 45–50 seconds.
+ * branching waves build larger crowds without spawning everyone at once.
  */
 public final class CrowdArrival {
-    public static final int MAX_FANS = 30;
+    public static final int MAX_FANS = 100;
     private static final int INITIAL_SPOT_TICKS = 4;
     private static final int TICKS_PER_GENERATION = 16;
     private static final int MAX_JITTER_TICKS = 2;
@@ -19,7 +19,7 @@ public final class CrowdArrival {
         }
         if (ordinal == 0) return startTick + INITIAL_SPOT_TICKS;
 
-        // floor(log2(ordinal + 1)): generations contain 1, 2, 4, 8, then 15 fans.
+        // floor(log2(ordinal + 1)): generations contain 1, 2, 4, 8, 16, 32, then the remaining fans.
         int generation = 31 - Integer.numberOfLeadingZeros(ordinal + 1);
         int genStart = (1 << generation) - 1;
         int genSize = 1 << generation;
