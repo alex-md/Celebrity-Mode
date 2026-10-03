@@ -16,7 +16,7 @@ public final class SidebarPreview {
         SwingUtilities.invokeAndWait(() -> {
             try {
                 PanelFixture config = new PanelFixture();
-                config.values.put("customQuotes", "{player} can we get a bank tour\nall this gear just to forget a teleport\n{target} has no idea this is going on youtube");
+                config.values.put("customQuotes", "{player} can we get a bank tour\nall this gear just to forget a teleport\n{target} can we get an autograph after this");
                 CelebrityModePanel panel = new CelebrityModePanel(config, config::write);
                 String[] pages = {"Crowd", "Dialogue", "Extras"};
                 BufferedImage[] images = new BufferedImage[pages.length];

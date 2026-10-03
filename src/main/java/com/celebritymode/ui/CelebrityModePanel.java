@@ -72,7 +72,7 @@ public final class CelebrityModePanel extends PluginPanel {
         pages.add(extrasPage());
         add(body);
         add(Box.createVerticalStrut(12));
-        add(hint("Only you see the fans. Your recording captures the audience."));
+        add(hint("Your own fan club, just for fun. Only you see the fans."));
         refresh(null);
         selectPage(0);
     }
@@ -82,9 +82,9 @@ public final class CelebrityModePanel extends PluginPanel {
         header.setOpaque(false);
         header.add(new JLabel(new ImageIcon(CelebrityModeIcon.create(36))), BorderLayout.WEST);
         JPanel titles = column();
-        JLabel title = label("Celebrity Mode", TEXT, FontManager.getRunescapeBoldFont().deriveFont(20f));
+        JLabel title = label("Fame Simulator", TEXT, FontManager.getRunescapeBoldFont().deriveFont(20f));
         titles.add(title);
-        titles.add(label("YOUR IN-GAME AUDIENCE", MUTED, SMALL.deriveFont(10f)));
+        titles.add(label("YOUR OWN FAN CLUB", MUTED, SMALL.deriveFont(10f)));
         titles.add(Box.createVerticalStrut(4));
         titles.add(summary);
         header.add(titles, BorderLayout.CENTER);
@@ -95,21 +95,21 @@ public final class CelebrityModePanel extends PluginPanel {
     private JPanel crowdPage() {
         JPanel page = column();
         JPanel crowd = section("Your crowd", "Changes apply while you play.");
-        toggle(crowd, "Show crowd", "Hide between takes without losing your setup.",
+        toggle(crowd, "Show crowd", "Hide or show your fans without losing your setup.",
                 "showCrowd", config::showCrowd);
         number(crowd, "Fans", "crowdSize", 1, CrowdArrival.MAX_FANS, config::crowdSize, "fans");
         JLabel scaleNote = hint("");
         crowd.add(scaleNote);
         crowd.add(Box.createVerticalStrut(8));
         refreshers.put("largeCrowdNote", () -> scaleNote.setText(html(config.crowdSize() > 30
-                ? "Large cast: more overlap and rendering work. Spread the crowd out for clearer shots."
-                : "A few fans for a bit, or a full crowd for the reveal.")));
+                ? "Large crowd: more overlap and rendering work. Try a wider spread."
+                : "A few loyal fans, or a crowd wherever you go.")));
         combo(crowd, "Formation", "formationStyle", FormationStyle.values(), config::formationStyle);
         combo(crowd, "Arrival pace", "arrivalPace", ArrivalPace.values(), config::arrivalPace);
         crowd.add(hint("Arrival pace applies to new fans. Hide and show the crowd to start a fresh entrance."));
         finish(page, crowd);
 
-        JPanel presets = section("Set the scene", "Presets change fans, formation, and chatter.");
+        JPanel presets = section("Choose your crowd", "Presets change fans, formation, and chatter.");
         preset(presets, "Small audience", "8 fans · Entourage · Low chatter", 8, FormationStyle.ENTOURAGE, ChatFrequency.LOW);
         preset(presets, "Fan club", "24 fans · Loose crowd · Normal chatter", 24, FormationStyle.LOOSE_CROWD, ChatFrequency.NORMAL);
         preset(presets, "Big entrance", "60 fans · Swarm · Spam chatter", 60, FormationStyle.SWARM, ChatFrequency.SPAM);
@@ -125,7 +125,7 @@ public final class CelebrityModePanel extends PluginPanel {
         chatter.add(hint("Off mutes overhead dialogue. Built-in chatter reacts to banking, combat, gear, and skilling."));
         finish(page, chatter);
 
-        JPanel inbox = section("Celebrity inbox", "A flood of incoming fan PMs in native private chat.");
+        JPanel inbox = section("Fan inbox", "A flood of incoming fan PMs in native private chat.");
         toggle(inbox, "Enable fan PMs", "Local simulation. No messages are sent to other players.",
                 "enableFanPms", config::enableFanPms);
         combo(inbox, "Traffic intensity", "pmTrafficIntensity", TrafficIntensity.values(), config::pmTrafficIntensity);
@@ -199,7 +199,7 @@ public final class CelebrityModePanel extends PluginPanel {
 
     private JPanel extrasPage() {
         JPanel page = column();
-        JPanel appearance = section("The look", "Dress the cast and give them room.");
+        JPanel appearance = section("The look", "Dress your fans and give them room.");
         combo(appearance, "Gear theme", "crowdGearTier", FanGearTier.values(), config::crowdGearTier);
         toggle(appearance, "Fan names", "Show simulated usernames above followers.", "showFanNames", config::showFanNames);
         number(appearance, "Travelling spread", "maxSpread", 1, 8, config::maxSpread, "tiles");

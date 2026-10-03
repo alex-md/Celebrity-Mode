@@ -1,33 +1,39 @@
-# Celebrity Mode
+# Fame Simulator
 
-<img src="docs/images/celebrity-mode-icon.png" alt="Celebrity Mode crown icon" width="96" height="96">
+<img src="docs/images/celebrity-mode-icon.png" alt="Fame Simulator crown icon" width="96" height="96">
 
-Give your OSRS character a fan club—and give that fan club something funny to say.
+Feel famous in Gielinor. Even if you’re just killing chickens.
 
-Celebrity Mode is a RuneLite plugin that adds 1–100 simulated followers around your character. Write custom overhead dialogue for a video bit, fill a scene with an overenthusiastic crowd, or let the fans react as you bank, fight, skill, and travel. It’s made for those moments where even a routine bank trip could use an audience.
+Fame Simulator gives your OSRS character an overenthusiastic fan club. Up to 100 simulated fans follow you around, comment on what you’re doing, cheer your levels, and have far too much to say about your gear. Turn on fan PMs for an inbox full of people asking whether it’s really you. It’s a little taste of RuneScape fame while you bank, skill, fight, or wander around.
 
-The fans are cosmetic and visible only in your client, so they appear in recordings and streams that capture your RuneLite game view. Other players won’t see them. Overhead dialogue and fan PMs are simulated locally; the plugin never sends messages to other players.
+The fans and their messages are cosmetic and visible only in your client. Other players won’t see them, and the plugin never sends messages to anyone.
 
-## An audience for your next video
+## Your own fan club
 
-- **Give the crowd your own lines.** Add running jokes, catchphrases, or commentary for an OSRS video. Use only your custom quotes, or mix them with built-in chatter.
-- **Let fans react to the scene.** Banking gets bank chatter. Combat gets comments about your target. Fans notice your equipped weapon and weapon swaps, talk about recent skilling, celebrate levels, and react when you die.
-- **Make the crowd fit the bit.** Start with a few followers or go all the way to 100. Choose outfits, travelling formations, optional usernames, and chatter from occasional comments to constant shouting.
-- **Flood your celebrity inbox.** Turn on simulated incoming fan PMs, from occasional messages to hundreds per minute, in the native private-chat display.
-- **Keep the scene feeling alive.** Fans arrive gradually, follow your route, gather and wander when you stop, and occasionally wave or cheer. Different personalities and varied dialogue help them feel like a crowd of players hanging around you.
+- **Take an entourage everywhere.** Keep a few loyal followers or surround yourself with up to 100 fans. They arrive gradually, follow your route, gather when you stop, and occasionally wave or cheer.
+- **Get hyped up for ordinary things.** Fans comment on banking, combat targets, your weapon, and recent skilling. They celebrate levels and react when you die. Apparently, your next bank trip is a big deal.
+- **Experience the inbox chaos.** Optional simulated incoming fan PMs range from occasional messages to hundreds per minute in the native private-chat display.
+- **Choose your kind of fame.** Pick outfits, formations, optional usernames, and chatter from occasional comments to everyone shouting over each other.
+- **Give fans your own jokes.** Add catchphrases or running jokes, use only your custom lines, or mix them with built-in chatter.
 
-Use it for a fake celebrity encounter, a crowd that hypes up your Slayer trip, or a group of fans who have far too much to say about your bank organisation.
+Want a crowd that hypes up your Slayer trip or treats your bank organisation like a public event? That’s the idea. You can also use the fans for a fake celebrity encounter, an OSRS video bit, or a stream gag: recordings and streams that capture your RuneLite game view capture the crowd too.
+
+## Get famous
+
+Enable **Fame Simulator** in RuneLite, then click the gold **crown icon** in the sidebar.
+
+1. In **Crowd**, choose 1–100 fans, a formation, and an arrival pace—or try a crowd preset. Use **Show crowd** to hide or show your fan club without losing your settings.
+2. In **Extras**, choose outfits, fan names, personal space, and travelling spread.
+3. In **Dialogue**, choose how often fans talk. **Low** gives you individual comments, **Normal** makes a busy crowd, and **Spam** has everyone shouting over each other. Built-in chatter works without writing any lines yourself.
+4. For the full celebrity experience, enable **Fan PMs** in **Dialogue → Fan inbox** and choose a traffic intensity.
+
+Crowd controls save as you change them. The regular RuneLite settings remain available and stay in sync with the sidebar.
 
 ## Give your followers something to say
 
-Enable **Celebrity Mode** in RuneLite, then click the gold **crown icon** in the sidebar.
+For your own jokes or creator bits, choose **My lines only** in **Dialogue**, or **Built-in + my lines** to keep the automatic commentary too. Paste one quote per line and click **Save lines**. Placeholder buttons insert character, gear, target, and skill references.
 
-1. In **Crowd**, choose 1–100 fans, a formation, and an arrival pace—or start with a scene preset. Use **Show crowd** to hide the fans between takes without losing your settings.
-2. In **Extras**, choose outfits, fan names, personal space, and travelling spread.
-3. In **Dialogue**, choose **My lines only** for your own material, or **Built-in + my lines** to include automatic commentary. Paste one quote per line and click **Save lines**. Placeholder buttons insert character, gear, target, and skill references.
-4. Choose a dialogue frequency: **Low** for readable individual comments, **Normal** for a busy crowd, or **Spam** for everyone shouting over each other.
-
-Crowd controls save as you change them. Quote edits stay as a draft until you save; **Revert** reloads the saved lines. The regular RuneLite settings remain available and stay in sync with the sidebar.
+Quote edits stay as a draft until you save; **Revert** reloads the saved lines.
 
 For example:
 
@@ -35,11 +41,11 @@ For example:
 {player} can we get a bank tour
 all this gear just to forget a teleport
 {player} brought the {gear}. we're saved
-{target} has no idea this is going on youtube
+{target} can we get an autograph after this
 i was here before the first 99
 ```
 
-Quotes are chosen from your pool automatically. You can change the pool and other settings while the plugin is running, so swap in lines that suit the next scene. Custom quotes aren't assigned to particular activities or triggered on cue.
+Quotes are chosen from your pool automatically. You can change the pool and other settings while the plugin is running, so swap in jokes whenever you like. Custom quotes aren't assigned to particular activities or triggered on cue.
 
 | Placeholder | Replaced with |
 | --- | --- |
@@ -57,11 +63,11 @@ Built-in dialogue uses your character’s current activity to pick its subject. 
 
 The dialogue combines hundreds of patterns with personality-specific wording and remembers recent lines to reduce repetition. That gives you spontaneous commentary while you play, alongside any custom jokes you add.
 
-Bank chatter currently detects an open bank interface; it does not identify the bank’s location. Gear comments refer to your equipped weapon. You can write location-specific lines into your custom quote pool for a scene at a particular bank.
+Bank chatter currently detects an open bank interface; it does not identify the bank’s location. Gear comments refer to your equipped weapon. You can write location-specific lines into your custom quote pool for your favourite bank.
 
-## Celebrity inbox
+## Fan inbox
 
-In **Dialogue → Celebrity inbox**, enable **Fan PMs** to simulate an incoming flood of direct messages. Fictional senders hype you up, ask for GP or clan visits, act like old friends, or wonder whether it’s really you. Small templates combine greetings, bosses, items, clan names, requests, and slang to keep the inbox varied.
+In **Dialogue → Fan inbox**, enable **Fan PMs** to simulate an incoming flood of direct messages. Fictional senders hype you up, ask for GP or clan visits, act like old friends, or wonder whether it’s really you. Small templates combine greetings, bosses, items, clan names, requests, and slang to keep the inbox varied.
 
 | Traffic intensity | Target average |
 | --- | --- |
@@ -82,20 +88,20 @@ Even the chicken pen gets an audience:
 
 ![Fans chatting about your gear in a chicken pen](docs/images/fans-at-chickens.png)
 
-A larger crowd, the creator sidebar, and incoming fan PMs in split chat:
+A larger crowd, the fan club controls, and incoming fan PMs in split chat (shown under the earlier Celebrity Mode name):
 
-![Celebrity Mode in game with 33 fans, native fan PMs, and sidebar controls](docs/images/celebrity-mode-in-game.png)
+![Fame Simulator in game with 33 fans, native fan PMs, and sidebar controls](docs/images/celebrity-mode-in-game.png)
 
-## Your creator sidebar
+## Your fan club controls
 
-The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a summary of the configured crowd and chatter at the top. Quick scene presets set fans, formation, and frequency while keeping your quotes and appearance choices.
+The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a summary of the configured crowd and chatter at the top. Quick crowd presets set fans, formation, and frequency while keeping your quotes and appearance choices.
 
 ## Settings at a glance
 
 | Setting | Default | What it does |
 | --- | --- | --- |
 | Crowd size | 8 | Choose 1–100 fans; new fans use your chosen arrival pace |
-| Show crowd | On | Hide or show the cast without losing settings |
+| Show crowd | On | Hide or show the fans without losing settings |
 | Arrival pace | Gradual | Gradual, Quick, or Instant; applies to new arrivals |
 | Formation | Entourage | Travel as an Entourage, Trail, Loose Crowd, or Swarm; all gather around you when stopped |
 | Personal space | On | Prefer separate tiles; large stopped crowds gather over a wider area |
@@ -115,7 +121,7 @@ The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a su
 
 ## Installation
 
-Open RuneLite’s **Plugin Hub**, search for **Celebrity Mode**, and click **Install**. Updates become available after RuneLite maintainers review and merge the corresponding Hub update.
+Open RuneLite’s **Plugin Hub**, search for **Fame Simulator**, and click **Install**. If you still see **Celebrity Mode**, the rename is awaiting RuneLite maintainer review. Existing users receive the rename through the usual Hub update.
 
 To run it locally for development, use JDK 17 and the checked-in Gradle wrapper:
 
@@ -124,13 +130,13 @@ To run it locally for development, use JDK 17 and the checked-in Gradle wrapper:
 ./gradlew run
 ```
 
-The developer launcher opens RuneLite with the plugin loaded. Log in and enable **Celebrity Mode** in the plugin panel.
+The developer launcher opens RuneLite with the plugin loaded. Log in and enable **Fame Simulator** in the plugin panel.
 
 See [development notes](docs/development.md) for build details, implementation, test coverage, and the remaining checks in a logged-in client.
 
 ## What to expect
 
-Larger crowds can overlap and cost more to render. Start small and increase the count to suit your scene and hardware.
+Larger crowds can overlap and cost more to render. Start small and increase the count to suit your taste and hardware.
 
 Fans cannot interact with the game or control your character. The plugin makes no network requests and includes no telemetry. Outfits currently use male body kits. Valuable-drop reactions are not implemented.
 

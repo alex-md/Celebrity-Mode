@@ -13,13 +13,13 @@ Use JDK 17 and the checked-in Gradle wrapper. Java output targets release 11, ma
 
 Use `./gradlew run -PverifyModels` for an opt-in check that builds every gear tier and applies eight animation sequences against the actual client cache at the login screen. This check is confined to the developer launcher.
 
-The developer launcher opens RuneLite with the plugin loaded. Enable **Celebrity Mode** in its plugin panel after logging in. The ordinary build artifact is `build/libs/celebrity-mode.jar`; the developer launcher is the supported local test route. `./gradlew shadowJar` also builds a developer launcher with dependencies. Plugin Hub distribution requires submission and review using the [Plugin Hub process](https://github.com/runelite/plugin-hub); this repository does not claim Hub approval.
+The developer launcher opens RuneLite with the plugin loaded. Enable **Fame Simulator** in its plugin panel after logging in. The ordinary build artifact is `build/libs/fame-simulator.jar`; the developer launcher is the supported local test route. `./gradlew shadowJar` also builds a developer launcher with dependencies. Plugin Hub distribution requires submission and review using the [Plugin Hub process](https://github.com/runelite/plugin-hub); this repository does not claim Hub approval.
 
 There are no additional runtime dependencies, network requests, telemetry, menu actions, or packet hooks in plugin code. Fan PMs use one bounded, disposable background scheduler while active; the rest of the scene simulation runs on client ticks. Build tools and the RuneLite client itself retain their normal dependency/download behavior.
 
 ## Sidebar development
 
-The creator panel uses RuneLite’s [PluginPanel](https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/ui/PluginPanel.java), `NavigationButton`, and `ClientToolbar`. Swing components are created and refreshed on the EDT. Controls write through `ConfigManager`; the existing `ConfigChanged` subscription applies scene mutations on the client thread. Configuration keys remain compatible with the regular settings panel. A quote draft survives unrelated setting changes and external edits; Save replaces the stored pool, and Revert reloads it.
+The fan club panel uses RuneLite’s [PluginPanel](https://github.com/runelite/runelite/blob/master/runelite-client/src/main/java/net/runelite/client/ui/PluginPanel.java), `NavigationButton`, and `ClientToolbar`. Swing components are created and refreshed on the EDT. Controls write through `ConfigManager`; the existing `ConfigChanged` subscription applies scene mutations on the client thread. Configuration keys remain compatible with the regular settings panel. A quote draft survives unrelated setting changes and external edits; Save replaces the stored pool, and Revert reloads it.
 
 The toolbar icon loads the supplied crown PNG from the bundled classpath resources and scales it for the sidebar. The root `icon.png` is a 48×48 version for Plugin Hub discovery. No external image library is required. Render all three tabs at the real sidebar width with RuneLite’s look and feel:
 

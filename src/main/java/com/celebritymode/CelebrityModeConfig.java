@@ -69,7 +69,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "showCrowd",
             name = "Show crowd",
-            description = "Hide the fans between takes while keeping your settings",
+            description = "Hide or show your fan club while keeping your settings",
             section = crowd,
             position = 4)
     default boolean showCrowd() {
@@ -79,7 +79,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "arrivalPace",
             name = "Arrival pace",
-            description = "Build the audience gradually, quickly, or all at once; applies to new arrivals",
+            description = "Build your fan club gradually, quickly, or all at once; applies to new arrivals",
             section = crowd,
             position = 5)
     default ArrivalPace arrivalPace() {

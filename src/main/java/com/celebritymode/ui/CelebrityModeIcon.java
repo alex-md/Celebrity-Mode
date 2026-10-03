@@ -15,12 +15,12 @@ public final class CelebrityModeIcon {
 
     private static BufferedImage load() {
         try (InputStream stream = CelebrityModeIcon.class.getResourceAsStream("icon.png")) {
-            if (stream == null) throw new IllegalStateException("Missing Celebrity Mode icon resource");
+            if (stream == null) throw new IllegalStateException("Missing Fame Simulator icon resource");
             BufferedImage image = ImageIO.read(stream);
-            if (image == null) throw new IllegalStateException("Invalid Celebrity Mode icon resource");
+            if (image == null) throw new IllegalStateException("Invalid Fame Simulator icon resource");
             return image;
         } catch (IOException ex) {
-            throw new IllegalStateException("Unable to load Celebrity Mode icon", ex);
+            throw new IllegalStateException("Unable to load Fame Simulator icon", ex);
         }
     }
 

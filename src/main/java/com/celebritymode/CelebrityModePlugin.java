@@ -24,9 +24,9 @@ import javax.inject.*;
 import javax.swing.SwingUtilities;
 
 @PluginDescriptor(
-        name = "Celebrity Mode",
-        description = "An in-game audience for OSRS videos with cosmetic fans, custom dialogue, and activity-aware reactions",
-        tags = {"fun", "cosmetic", "followers", "fans", "celebrity", "content", "creator", "video"})
+        name = "Fame Simulator",
+        description = "Feel famous in OSRS with your own simulated fan club, reactive crowd chatter, and optional fan PMs",
+        tags = {"fun", "cosmetic", "followers", "fans", "fame", "famous", "celebrity", "simulator", "creator", "video"})
 public class CelebrityModePlugin extends Plugin {
     @Inject private Client client;
     @Inject private ClientThread clientThread;
@@ -64,7 +64,7 @@ public class CelebrityModePlugin extends Plugin {
             panel = new CelebrityModePanel(config,
                     (key, value) -> configManager.setConfiguration(CelebrityModeConfig.GROUP, key, value));
             navigation = NavigationButton.builder()
-                    .tooltip("Celebrity Mode")
+                    .tooltip("Fame Simulator")
                     .icon(CelebrityModeIcon.create(32))
                     .priority(7)
                     .panel(panel)
