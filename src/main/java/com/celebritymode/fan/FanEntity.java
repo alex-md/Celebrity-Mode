@@ -15,7 +15,7 @@ public final class FanEntity {
     public int orientation, targetOrientation;
     public int arrivalTick = Integer.MAX_VALUE, nextWanderTick, nextChatTick;
     public boolean arrived;
-    public WorldPoint idleTarget;
+    public WorldPoint idleTarget, followTarget;
     public FanState state = FanState.DESPAWNED;
     public FanAppearance appearance;
     public RuneLiteObject object;
@@ -49,6 +49,7 @@ public final class FanEntity {
         overheadText = null;
         stalledTicks = 0;
         idleTarget = null;
+        followTarget = null;
         nextChatTick = 0;
     }
 

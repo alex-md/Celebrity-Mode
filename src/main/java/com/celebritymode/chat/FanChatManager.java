@@ -1,6 +1,7 @@
 package com.celebritymode.chat;
 
 import com.celebritymode.fan.*;
+import com.celebritymode.generation.FanUtterance;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -14,6 +15,9 @@ public final class FanChatManager {
     private FanChatContext context = FanChatContext.idle("", "");
     private final Deque<String> recentCrowd = new ArrayDeque<>();
     private final Map<FanEntity, Deque<String>> recentFans = new IdentityHashMap<>();
+    private final Deque<String> recentStructures = new ArrayDeque<>();
+    private final Map<FanEntity, Deque<String>> fanStructures = new IdentityHashMap<>();
+    private final Map<FanEntity, String> visibleStructures = new IdentityHashMap<>();
     private int nextTick = Integer.MAX_VALUE;
     private String lastQuote;
     private CustomQuoteMode mode = CustomQuoteMode.BUILT_IN_ONLY;
@@ -39,6 +43,8 @@ public final class FanChatManager {
 
     public void tick(List<FanEntity> fans, int tick) {
         recentFans.keySet().retainAll(fans);
+        fanStructures.keySet().retainAll(fans);
+        visibleStructures.keySet().retainAll(fans);
         for (FanEntity fan : fans) if (tick >= fan.overheadExpiryTick) fan.overheadText = null;
         if (frequency == ChatFrequency.OFF || tick < nextTick) return;
         nextTick = tick + frequency.delay(random);
@@ -61,13 +67,6 @@ public final class FanChatManager {
         for (int i = 0; i < Math.min(batch, eligible.size()); i++) {
             FanEntity fan = eligible.get(i);
             say(fan, chooseFor(fan), tick);
-            fan.nextChatTick =
-                    tick
-                            + (frequency == ChatFrequency.SPAM
-                                    ? 1 + random.nextInt(2)
-                                    : frequency == ChatFrequency.NORMAL
-                                            ? 3 + random.nextInt(3)
-                                            : 8 + random.nextInt(5));
         }
     }
 
@@ -107,38 +106,51 @@ public final class FanChatManager {
         FanChatContext previous = context;
         context = event;
         try {
-            react(
-                    fans,
-                    tick,
-                    new String[] {
-                        FanDialogueGenerator.level(event, random),
-                        FanDialogueGenerator.level(event, random)
-                    });
+            reactGenerated(fans, tick, () -> FanDialogueGenerator.level(event, random));
         } finally {
             context = previous;
         }
     }
 
-    private static String signature(String line) {
-        return SPACES.matcher(PUNCTUATION.matcher(line.toLowerCase(Locale.ENGLISH)).replaceAll(""))
-                .replaceAll(" ")
-                .trim();
+    private String signature(String line) {
+        String normalized = line.toLowerCase(Locale.ENGLISH);
+        if (!context.player.isEmpty()) normalized = normalized.replace(context.player.toLowerCase(Locale.ENGLISH), "");
+        normalized = normalized.replaceAll("\\b(ur)\\b", "your")
+                .replaceAll("\\b(u)\\b", "you");
+        return SPACES.matcher(PUNCTUATION.matcher(normalized).replaceAll(""))
+                .replaceAll(" ").trim();
     }
 
-    private String chooseFor(FanEntity fan) {
+    private FanUtterance chooseFor(FanEntity fan) {
         if (mode == CustomQuoteMode.CUSTOM_ONLY
                 || (mode == CustomQuoteMode.MIXED && !custom.isEmpty() && random.nextInt(3) == 0))
-            return choose(custom);
-        String line = null;
-        for (int attempt = 0; attempt < 24; attempt++) {
-            line = FanDialogueGenerator.generate(random, fan.personality, context);
-            String key = signature(line);
-            if (!recentCrowd.contains(key)
-                    && (recentFans.get(fan) == null || !recentFans.get(fan).contains(key))
-                    && !line.equals(lastQuote)) break;
+            return new FanUtterance(choose(custom), null);
+        FanUtterance best = null;
+        int bestPenalty = Integer.MAX_VALUE;
+        int lengthRoll = random.nextInt(100);
+        // Evaluate a bounded set of candidates, preferring new wording AND new structure.
+        for (int attempt = 0; attempt < 48; attempt++) {
+            FanUtterance candidate = FanDialogueGenerator.generateUtterance(random, fan.personality, context, lengthRoll);
+            String key = signature(candidate.text);
+            int penalty = recentCrowd.contains(key) ? 8 : 0;
+            if (recentFans.get(fan) != null && recentFans.get(fan).contains(key)) penalty += 12;
+            if (recentStructures.contains(candidate.structure)) penalty += 4;
+            if (fanStructures.get(fan) != null && fanStructures.get(fan).contains(candidate.structure)) penalty += 6;
+            for (Map.Entry<FanEntity, String> entry : visibleStructures.entrySet()) {
+                FanEntity other = entry.getKey();
+                if (other != fan && other.overheadText != null && other.isVisible()
+                        && candidate.text.length() > 40 && candidate.structure.equals(entry.getValue()))
+                    penalty += 10;
+            }
+            if (candidate.text.equals(lastQuote)) penalty += 20;
+            if (penalty < bestPenalty) {
+                best = candidate;
+                bestPenalty = penalty;
+            }
+            if (penalty == 0) break;
         }
-        lastQuote = line;
-        return line;
+        lastQuote = best.text;
+        return best;
     }
 
     public String choose(List<String> pool) {
@@ -153,32 +165,58 @@ public final class FanChatManager {
         return quote;
     }
 
+    public void reactEvent(List<FanEntity> fans, int tick, String event) {
+        reactGenerated(fans, tick, () -> FanDialogueGenerator.event(event, context, random));
+    }
+
     public void react(List<FanEntity> fans, int tick, String[] quotes) {
-        if (frequency == ChatFrequency.OFF || fans.isEmpty()) return;
-        List<String> source = mode == CustomQuoteMode.CUSTOM_ONLY ? custom : Arrays.asList(quotes);
-        if (source.isEmpty()) return;
+        reactGenerated(fans, tick, () -> choose(Arrays.asList(quotes)));
+    }
+
+    private void reactGenerated(List<FanEntity> fans, int tick, java.util.function.Supplier<String> generate) {
+        if (frequency == ChatFrequency.OFF || fans.isEmpty()
+                || (mode == CustomQuoteMode.CUSTOM_ONLY && custom.isEmpty())) return;
         int start = random.nextInt(fans.size());
         for (int i = 0; i < Math.min(2, fans.size()); i++) {
             FanEntity fan = fans.get((start + i) % fans.size());
             if (fan.isVisible()) {
-                say(fan, choose(source), tick);
+                say(fan, mode == CustomQuoteMode.CUSTOM_ONLY ? choose(custom) : generate.get(), tick);
                 fan.nextChatTick = Math.max(fan.nextChatTick, tick + 3);
             }
         }
     }
 
     private void say(FanEntity fan, String quote, int tick) {
+        say(fan, new FanUtterance(quote, null), tick);
+    }
+
+    private void say(FanEntity fan, FanUtterance utterance, int tick) {
+        String quote = utterance.text;
+        if (utterance.structure != null && quote != null) {
+            remember(recentStructures, utterance.structure, 16);
+            remember(fanStructures.computeIfAbsent(fan, ignored -> new ArrayDeque<>()), utterance.structure, 6);
+            visibleStructures.put(fan, utterance.structure);
+        } else visibleStructures.remove(fan);
         if (quote != null) {
             String key = signature(quote);
-            recentCrowd.addLast(key);
-            if (recentCrowd.size() > 64) recentCrowd.removeFirst();
+            remember(recentCrowd, key, 96);
             Deque<String> personal = recentFans.computeIfAbsent(fan, ignored -> new ArrayDeque<>());
-            personal.addLast(key);
-            if (personal.size() > 12) personal.removeFirst();
+            remember(personal, key, 16);
             fan.overheadText = quote;
-            fan.overheadExpiryTick = tick + 5 + random.nextInt(4);
+            fan.overheadExpiryTick = tick + 5 + quote.length() / 12 + random.nextInt(4);
+            // Roughly 40–80 words/minute, plus thinking time, consistent for each sender.
+            int typingTicks = (quote.length() + 1) / (2 + Math.floorMod(fan.id, 3));
+            fan.nextChatTick = Math.max(fan.nextChatTick,
+                    tick + Math.max(4, typingTicks) + 2 + random.nextInt(5));
         }
     }
+
+    private static void remember(Deque<String> history, String value, int limit) {
+        history.addLast(value);
+        if (history.size() > limit) history.removeFirst();
+    }
+
+    String visibleStructure(FanEntity fan) { return visibleStructures.get(fan); }
 
     public void clear(List<FanEntity> fans) {
         for (FanEntity f : fans) {
@@ -188,6 +226,9 @@ public final class FanChatManager {
         lastQuote = null;
         recentCrowd.clear();
         recentFans.clear();
+        recentStructures.clear();
+        fanStructures.clear();
+        visibleStructures.clear();
         nextTick = Integer.MAX_VALUE;
     }
 }

@@ -374,3 +374,14 @@ firemaking|{player} firemaking with an audience
 firemaking|{player} warming up before the next grind?
 firemaking|{player} what's the firemaking goal
 firemaking|{player} the fans are keeping a safe distance
+
+# Original recognition and event reactions, retained alongside procedural dialogue.
+recognition|omg {player}
+recognition|{player} screenshot pls
+recognition|no way {player}
+death|rip {player}
+death|{player} noooo
+death|F for {player}
+achievement|gz {player}
+achievement|huge {player}
+achievement|{player} lets go

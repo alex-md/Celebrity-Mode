@@ -59,7 +59,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "crowdSize",
             name = "Crowd size",
-            description = "Number of simulated fans",
+            description = "Maximum simulated fans; attendance varies slightly over time",
             section = crowd,
             position = 0)
     default int crowdSize() {

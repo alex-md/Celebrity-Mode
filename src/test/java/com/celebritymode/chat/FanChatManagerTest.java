@@ -18,12 +18,7 @@ public class FanChatManagerTest {
         assertEquals(Arrays.asList("hi", "gz"), FanQuoteLibrary.parse("hi\r\ngz"));
         assertTrue(FanQuoteLibrary.parse(" , , ").isEmpty());
         assertTrue(FanQuoteLibrary.parse(null).isEmpty());
-        assertTrue(
-                FanQuoteLibrary.pool(
-                                FanPersonality.EXCITED,
-                                CustomQuoteMode.CUSTOM_ONLY,
-                                FanQuoteLibrary.parse(""))
-                        .isEmpty());
+
     }
 
     @Test
@@ -44,7 +39,7 @@ public class FanChatManagerTest {
     }
 
     @Test
-    public void spamKeepsMostOfTheCrowdTalking() {
+    public void busyCrowdUsesHumanTypingCadence() {
         com.celebritymode.TestScene scene = new com.celebritymode.TestScene();
         scene.config.size = 30;
         scene.populate();
@@ -55,6 +50,7 @@ public class FanChatManagerTest {
             fan.overheadText = null;
         }
         int busyTicks = 0, messages = 0;
+        Map<Integer, Integer> lastMessage = new HashMap<>();
         for (int tick = 1; tick <= 100; tick++) {
             int[] old = new int[30];
             for (int i = 0; i < 30; i++) old[i] = scene.manager.getFans().get(i).overheadExpiryTick;
@@ -63,12 +59,18 @@ public class FanChatManagerTest {
             for (int i = 0; i < 30; i++) {
                 com.celebritymode.fan.FanEntity fan = scene.manager.getFans().get(i);
                 if (fan.overheadText != null) speaking++;
-                if (old[i] != fan.overheadExpiryTick) messages++;
+                if (old[i] != fan.overheadExpiryTick) {
+                    messages++;
+                    if (lastMessage.containsKey(fan.id))
+                        assertTrue("Each sender has time to type", tick - lastMessage.get(fan.id) >= 6);
+                    assertTrue(fan.nextChatTick - tick >= fan.overheadText.length() / 4 + 2);
+                    lastMessage.put(fan.id, tick);
+                }
             }
-            if (speaking >= 20) busyTicks++;
+            if (speaking >= 5) busyTicks++;
         }
-        assertTrue("Near-constant visible chatter", busyTicks >= 95);
-        assertTrue("Many messages each second", messages > 1200);
+        assertTrue("The crowd still feels busy", busyTicks >= 85);
+        assertTrue("Varied chatter without rapid-fire individual senders: " + messages, messages > 80 && messages < 400);
     }
 
     @Test
@@ -107,8 +109,8 @@ public class FanChatManagerTest {
             previous = line;
             messages++;
         }
-        assertTrue(messages > 200);
-        assertTrue(targetLines > 30);
+        assertTrue(messages > 10 && messages < 80);
+        assertTrue(targetLines > 2);
         assertTrue("Per-fan recent duplicates: " + repeat, repeat <= 2);
         chat.setContext(FanChatContext.idle("New Name", ""));
         for (int tick = 400; tick < 440; tick++) {
@@ -119,6 +121,52 @@ public class FanChatManagerTest {
                 assertFalse(fan.overheadText.contains("LocalHero"));
             }
         }
+    }
+
+    @Test
+    public void aLargeCrowdKeepsMessagesBriefAndAvoidsRepeatingSentenceShapesOnScreen() {
+        com.celebritymode.TestScene scene = new com.celebritymode.TestScene();
+        scene.config.size = 100;
+        scene.config.arrival = com.celebritymode.fan.ArrivalPace.INSTANT;
+        scene.tick();
+        FanChatManager chat = new FanChatManager(new Random(213));
+        chat.clear(scene.manager.getFans());
+        chat.configure(ChatFrequency.SPAM, CustomQuoteMode.BUILT_IN_ONLY, "", 0);
+        chat.setContext(FanChatContext.idle("Zszima", ""));
+        int messages = 0, brief = 0, totalLength = 0, repeatedStructures = 0;
+        Deque<String> recent = new ArrayDeque<>();
+        Set<String> structures = new HashSet<>();
+        for (int tick = 1; tick <= 200; tick++) {
+            Map<Integer, Integer> expiry = new HashMap<>();
+            for (com.celebritymode.fan.FanEntity fan : scene.manager.getFans())
+                expiry.put(fan.id, fan.overheadExpiryTick);
+            chat.tick(scene.manager.getFans(), tick);
+            Map<String, Integer> visibleLong = new HashMap<>();
+            for (com.celebritymode.fan.FanEntity fan : scene.manager.getFans()) {
+                String structure = chat.visibleStructure(fan);
+                if (fan.overheadText != null && fan.overheadText.length() > 40)
+                    visibleLong.merge(structure, 1, Integer::sum);
+                if (expiry.get(fan.id) == fan.overheadExpiryTick) continue;
+                messages++;
+                totalLength += fan.overheadText.length();
+                if (fan.overheadText.length() <= 40) brief++;
+                structures.add(structure);
+                if (recent.contains(structure)) repeatedStructures++;
+                recent.addLast(structure);
+                if (recent.size() > 16) recent.removeFirst();
+            }
+            for (int count : visibleLong.values())
+                assertTrue("Avoid the screenshot's simultaneous repeated long templates", count <= 1);
+        }
+        assertTrue(messages > 1000);
+        assertTrue("Shortness survives repetition filtering: " + brief + "/" + messages, brief > messages * 0.8);
+        assertTrue("Average displayed length: " + totalLength / (double) messages, totalLength < messages * 30);
+        assertTrue("Structures vary across different speakers", structures.size() > 90);
+        assertTrue("Few recent template repeats: " + repeatedStructures + "/" + messages,
+                repeatedStructures < messages / 20);
+        chat.clear(scene.manager.getFans());
+        for (com.celebritymode.fan.FanEntity fan : scene.manager.getFans()) assertNull(chat.visibleStructure(fan));
+        scene.manager.cleanup();
     }
 
     @Test

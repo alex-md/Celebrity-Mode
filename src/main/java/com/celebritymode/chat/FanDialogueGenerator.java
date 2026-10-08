@@ -1,6 +1,9 @@
 package com.celebritymode.chat;
 
 import com.celebritymode.fan.FanPersonality;
+import com.celebritymode.generation.ConversationComposer;
+import com.celebritymode.generation.FanUtterance;
+import com.celebritymode.generation.QuickChatComposer;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -86,6 +89,16 @@ public final class FanDialogueGenerator {
 
     public static String generate(
             Random random, FanPersonality personality, FanChatContext context) {
+        return generateUtterance(random, personality, context).text;
+    }
+
+    public static FanUtterance generateUtterance(
+            Random random, FanPersonality personality, FanChatContext context) {
+        return generateUtterance(random, personality, context, random.nextInt(100));
+    }
+
+    static FanUtterance generateUtterance(
+            Random random, FanPersonality personality, FanChatContext context, int lengthRoll) {
         String category;
         int roll = random.nextInt(100);
         if (context.lowHealth && roll < 20) category = "low_health";
@@ -101,20 +114,49 @@ public final class FanDialogueGenerator {
             }
             if (context.activity == FanChatContext.Activity.COMBAT
                     && !context.target.isEmpty()
-                    && random.nextBoolean()) category = "combat_target";
+                    && random.nextInt(4) != 0) category = "combat_target";
         } else
             category =
                     random.nextBoolean()
                             ? "social"
                             : personality.name().toLowerCase(Locale.ENGLISH);
-        return line(category, context, random, true);
+        if (lengthRoll >= 90) return lineUtterance(category, context, random, true);
+        return QuickChatComposer.generate(random, personality.name(), context.player, category,
+                context.gear.toLowerCase(Locale.ENGLISH), context.target,
+                context.skill == null ? "" : context.skill.getName().toLowerCase(Locale.ENGLISH),
+                lengthRoll < 80);
     }
 
     public static String level(FanChatContext context, Random random) {
-        return line("level", context, random, false);
+        if (random.nextInt(5) == 0) return line("level", context, random, false);
+        String skill = context.skill == null ? "skill" : context.skill.getName().toLowerCase(Locale.ENGLISH);
+        String body = pick(new String[] {"gz on ", "nice, ", "congrats on ", "well played, ", "good progress, "}, random)
+                + context.level + " " + skill + pick(new String[] {"", "!", ", well earned",
+                    ". good luck with the next goal", ". how long did that take?", ", nice milestone",
+                    ". another level done", ", keep it going", ". worth the time", ", solid session"}, random);
+        String addressed = context.player.isEmpty() ? body : context.player + ", " + body;
+        return ConversationComposer.style(random, "", addressed, 100);
+    }
+
+    public static String event(String event, FanChatContext context, Random random) {
+        if (random.nextInt(5) == 0) return line(event, context, random, false);
+        if (event.equals("recognition"))
+            return QuickChatComposer.generate(random, "EXCITED", context.player, "social",
+                    "", "", "", true).text;
+        String body = event.equals("death")
+                ? pick(new String[] {"rip", "bro unlucky", "ah nooo", "rough one", "go again",
+                    "F", "so close", "unlucky", "rip supplies", "noooo"}, random)
+                : pick(new String[] {"gz", "huge", "let's go", "nice", "well played",
+                    "big gz", "clean", "goated", "we take those", "let's gooo"}, random);
+        return random.nextBoolean() && !context.player.isEmpty() ? body + " " + context.player : body;
     }
 
     private static String line(
+            String category, FanChatContext context, Random random, boolean decorate) {
+        return lineUtterance(category, context, random, decorate).text;
+    }
+
+    private static FanUtterance lineUtterance(
             String category, FanChatContext context, Random random, boolean decorate) {
         List<String> valid = new ArrayList<>();
         for (String pattern : PATTERNS.getOrDefault(category, PATTERNS.get("social"))) {
@@ -124,8 +166,9 @@ public final class FanDialogueGenerator {
             valid.add(pattern);
         }
         if (valid.isEmpty()) valid = PATTERNS.get("social");
+        String pattern = valid.get(random.nextInt(valid.size()));
         String result =
-                valid.get(random.nextInt(valid.size()))
+                pattern
                         .replace("{player}", context.player.isEmpty() ? "friend" : context.player)
                         .replace(
                                 "{gear}",
@@ -150,7 +193,7 @@ public final class FanDialogueGenerator {
         if (decorate && random.nextInt(5) == 0 && !result.endsWith("?"))
             result += pick(ENDINGS, random);
         if (decorate && random.nextInt(24) == 0) result = result.toUpperCase(Locale.ENGLISH);
-        return result.substring(0, Math.min(100, result.length()));
+        return new FanUtterance(result.substring(0, Math.min(100, result.length())), pattern);
     }
 
     private static String pick(String[] options, Random random) {

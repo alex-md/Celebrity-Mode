@@ -31,6 +31,12 @@ public class FormationPlanner {
             int dy,
             MovementTrail trail,
             Set<WorldPoint> reserved) {
+        return chooseTarget(fan, player, dx, dy, trail, reserved, 0);
+    }
+
+    public WorldPoint chooseTarget(
+            FanEntity fan, WorldPoint player, int dx, int dy, MovementTrail trail,
+            Set<WorldPoint> reserved, int stationaryTicks) {
         int spread = Math.max(1, Math.min(8, config.maxSpread()));
         FormationStyle style = config.formationStyle();
         int delay =
@@ -41,7 +47,7 @@ public class FormationPlanner {
                                 : style == FormationStyle.LOOSE_CROWD
                                         ? 1 + fan.trailOffset / 2
                                         : 1 + fan.trailOffset / 3;
-        WorldPoint anchor = trail.getDelayedPoint(delay);
+        WorldPoint anchor = trail.getDelayedPoint(Math.max(0, delay - stationaryTicks / 2));
         if (anchor == null) anchor = player;
         // Each follower has its own persistent angle and depth, independent of list index/rows.
         double angle = fan.id * 2.399963229728653 + 0.71;
@@ -81,45 +87,52 @@ public class FormationPlanner {
         return best;
     }
 
-    /** Stopped crowds ignore travelling formation and choose short, asynchronous local strolls. */
+    /** A stable minority gradually breaks away; the majority keeps following in formation. */
+    public boolean shouldGather(FanEntity fan, int stationaryTicks) {
+        return Math.floorMod(fan.id * 37, 100) < 30
+                && stationaryTicks >= 25 + Math.floorMod(fan.id * 19, 80);
+    }
+
+    /** Hold a good viewing spot, with rare one-tile adjustments rather than radial wandering. */
     public WorldPoint chooseIdleTarget(
             FanEntity fan, WorldPoint player, Set<WorldPoint> reserved, Random random, int tick) {
-        if (fan.state == com.celebritymode.fan.FanState.REACTION) return fan.position;
-        // Large crowds need room to gather; small crowds retain the original close radius.
-        int crowdSize = Math.max(1, Math.min(com.celebritymode.fan.CrowdArrival.MAX_FANS, config.crowdSize()));
-        int crowdRadius = crowdSize > 30 ? (int) Math.ceil(Math.sqrt(crowdSize / Math.PI)) : 2;
-        int radius = Math.max(crowdRadius, Math.max(2, Math.min(8, config.maxSpread() + 1)));
-        if (fan.idleTarget != null
-                && fan.idleTarget.distanceTo(player) <= radius
-                && collision.canOccupy(fan.idleTarget)
-                && (tick < fan.nextWanderTick
-                        || (fan.position != null && !fan.position.equals(fan.idleTarget)))) {
-            reserved.add(fan.idleTarget);
-            return fan.idleTarget;
+        if (fan.state == com.celebritymode.fan.FanState.REACTION) {
+            reserved.add(fan.position);
+            return fan.position;
         }
-        WorldPoint preferred = null, shared = null;
-        for (int attempt = 0; attempt < 40; attempt++) {
-            int x = random.nextInt(2 * radius + 1) - radius;
-            int y = random.nextInt(2 * radius + 1) - radius;
-            if (x * x + y * y > radius * radius || (x == 0 && y == 0)) continue;
-            WorldPoint candidate = offset(player, x, y);
-            if (!collision.canOccupy(candidate) || !connected(player, candidate)) continue;
-            if (shared == null) shared = candidate;
-            if (reserved.contains(candidate)
-                    || candidate.equals(fan.position)
-                    || candidate.equals(fan.idleTarget)) continue;
+        int crowdSize = Math.max(1, Math.min(com.celebritymode.fan.CrowdArrival.MAX_FANS, config.crowdSize()));
+        int radius = Math.max(3, (int) Math.ceil(Math.sqrt(crowdSize / Math.PI)));
+        if (fan.idleTarget != null && collision.canOccupy(fan.idleTarget)
+                && fan.idleTarget.distanceTo(player) <= radius) {
+            if (!fan.idleTarget.equals(fan.position) || tick < fan.nextWanderTick) {
+                reserved.add(fan.idleTarget);
+                return fan.idleTarget;
+            }
+            fan.nextWanderTick = tick + 100 + random.nextInt(200);
+            // Most opportunities pass without moving, even after a long pause.
+            if (random.nextInt(5) != 0) {
+                reserved.add(fan.idleTarget);
+                return fan.idleTarget;
+            }
+        }
+        WorldPoint origin = fan.idleTarget == null ? player : fan.position;
+        WorldPoint preferred = fan.position;
+        for (int attempt = 0; attempt < 24; attempt++) {
+            int reach = fan.idleTarget == null ? radius : 1;
+            WorldPoint candidate = offset(origin,
+                    random.nextInt(2 * reach + 1) - reach,
+                    random.nextInt(2 * reach + 1) - reach);
+            if (candidate.distanceTo(player) > radius
+                    || candidate.equals(player)
+                    || (config.respectPersonalSpace() && candidate.distanceTo(player) < 2)
+                    || reserved.contains(candidate)
+                    || !collision.canOccupy(candidate)
+                    || !connected(origin, candidate)) continue;
             preferred = candidate;
             break;
         }
-        if (preferred == null) preferred = shared;
-        if (preferred == null && collision.canOccupy(player)) preferred = player;
         fan.idleTarget = preferred;
-        // Brief pauses, varied independently; never pick a new destination every frame.
-        fan.nextWanderTick =
-                tick
-                        + (fan.personality == com.celebritymode.fan.FanPersonality.QUIET
-                                ? 5 + random.nextInt(5)
-                                : 2 + random.nextInt(5));
+        fan.nextWanderTick = tick + 100 + random.nextInt(200);
         if (preferred != null) reserved.add(preferred);
         return preferred;
     }

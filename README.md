@@ -10,7 +10,7 @@ The fans and their messages are cosmetic and visible only in your client. Other 
 
 ## Your own fan club
 
-- **Take an entourage everywhere.** Keep a few loyal followers or surround yourself with up to 100 fans. They arrive gradually, follow your route, gather when you stop, and occasionally wave or cheer.
+- **Take an entourage everywhere.** Keep a few loyal followers or surround yourself with up to 100 fans. They arrive gradually and follow your route. After a longer pause, some find a viewing spot while most keep their place in the train.
 - **Get hyped up for ordinary things.** Fans comment on banking, combat targets, your weapon, and recent skilling. They celebrate levels and react when you die. Apparently, your next bank trip is a big deal.
 - **Experience the inbox chaos.** Optional simulated incoming fan PMs range from occasional messages to hundreds per minute in the native private-chat display.
 - **Choose your kind of fame.** Pick outfits, formations, optional usernames, and chatter from occasional comments to everyone shouting over each other.
@@ -22,12 +22,18 @@ Want a crowd that hypes up your Slayer trip or treats your bank organisation lik
 
 Enable **Fame Simulator** in RuneLite, then click the gold **crown icon** in the sidebar.
 
-1. In **Crowd**, choose 1–100 fans, a formation, and an arrival pace—or try a crowd preset. Use **Show crowd** to hide or show your fan club without losing your settings.
+1. In **Crowd**, choose a maximum of 1–100 fans, a formation, and an arrival pace—or try a crowd preset. Use **Show crowd** to hide or show your fan club without losing your settings.
 2. In **Extras**, choose outfits, fan names, personal space, and travelling spread.
-3. In **Dialogue**, choose how often fans talk. **Low** gives you individual comments, **Normal** makes a busy crowd, and **Spam** has everyone shouting over each other. Built-in chatter works without writing any lines yourself.
+3. In **Dialogue**, choose how often fans talk. **Low** gives you individual comments, **Normal** makes a busy crowd, and **Spam** lets more people speak at once. Each fan still needs time to type. Built-in chatter works without writing any lines yourself.
 4. For the full celebrity experience, enable **Fan PMs** in **Dialogue → Fan inbox** and choose a traffic intensity.
 
 Crowd controls save as you change them. The regular RuneLite settings remain available and stay in sync with the sidebar.
+
+## A crowd that settles and changes
+
+Followers keep catching up when you stop, rather than immediately wandering around. After about 15–60 seconds idle, roughly 30% of the crowd gradually picks a nearby viewing spot. Most remain in the following formation. Settled fans usually hold their tile; occasional adjustments are short and spaced well apart. Moving again brings everyone back into following behavior.
+
+Your chosen crowd size is a maximum. After an initial settling period of about six minutes, attendance can drift down and back up within a small band of roughly 8% below that limit, with at least one fan remaining. Nearby real-player activity, your local time of day, and random variation influence attendance. Changes happen one fan at a time, usually tens of seconds apart; new fans use your selected arrival pace. Nearby activity is a local estimate, not a count of everyone logged into the world.
 
 ## Give your followers something to say
 
@@ -61,13 +67,19 @@ Use one quote per line if your dialogue contains commas. A single line can also 
 
 Built-in dialogue uses your character’s current activity to pick its subject. Open the bank and fans talk about supplies, gear setups, and bank tabs. Fight a monster and they can name the target. Switch weapons and someone may notice. Gain skill XP and the conversation can shift to that skill. Level reactions name the actual skill and level.
 
-The dialogue combines hundreds of patterns with personality-specific wording and remembers recent lines to reduce repetition. That gives you spontaneous commentary while you play, alongside any custom jokes you add.
+Most overhead chatter is brief: reactions like “omg”, greetings like “bro hi”, questions about whether it’s really you, quick requests, hype, and short jokes. Words, subjects, and typing styles combine across many different sentence structures. Activity comments still mention your current target, skill, or weapon when relevant, and occasional longer observations add variety. The existing dialogue and jokes remain available.
+
+Fans remember both recent wording and sentence structures across the crowd and individually. Swapping a name, item, or activity into the same template does not count as a fresh structure. Repetition checks preserve the mix of short and longer lines, and discourage simultaneous long comments with the same template. Fans also leave your name out of many messages.
+
+Each fan has a consistent typing pace. Longer messages take longer before their next comment, and stay visible longer so you can read them. **Spam** increases the number of speakers without making each person send a paragraph every second.
+
+Crowd names and PM senders use the same procedural name generator. It combines words, personal names, pronounceable syllables, separators, and optional numbers. Names fit the game’s 12-character limit; crowd names avoid duplicates and your character’s name.
 
 Bank chatter currently detects an open bank interface; it does not identify the bank’s location. Gear comments refer to your equipped weapon. You can write location-specific lines into your custom quote pool for your favourite bank.
 
 ## Fan inbox
 
-In **Dialogue → Fan inbox**, enable **Fan PMs** to simulate an incoming flood of direct messages. Fictional senders hype you up, ask for GP or clan visits, act like old friends, or wonder whether it’s really you. Small templates combine greetings, bosses, items, clan names, requests, and slang to keep the inbox varied.
+In **Dialogue → Fan inbox**, enable **Fan PMs** to simulate an incoming flood of direct messages. Fictional senders hype you up, ask for GP, advice or a group spot, act like old friends, or wonder whether it’s really you. Familiar fan messages still appear occasionally alongside the generated conversations. Most PMs are short greetings, reactions, and requests too. Occasional longer conversations remain in the mix. Recent wording and structure memory helps keep different senders from echoing the same template.
 
 | Traffic intensity | Target average |
 | --- | --- |
@@ -100,11 +112,11 @@ The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a su
 
 | Setting | Default | What it does |
 | --- | --- | --- |
-| Crowd size | 8 | Choose 1–100 fans; new fans use your chosen arrival pace |
+| Crowd size / Fan limit | 8 | Set a maximum of 1–100 fans; attendance varies slightly and new fans use your arrival pace |
 | Show crowd | On | Hide or show the fans without losing settings |
 | Arrival pace | Gradual | Gradual, Quick, or Instant; applies to new arrivals |
-| Formation | Entourage | Travel as an Entourage, Trail, Loose Crowd, or Swarm; all gather around you when stopped |
-| Personal space | On | Prefer separate tiles; large stopped crowds gather over a wider area |
+| Formation | Entourage | Travel as an Entourage, Trail, Loose Crowd, or Swarm; most keep following; some gradually gather after a longer pause |
+| Personal space | On | Prefer separate tiles; larger crowds have more room to choose a viewing spot |
 | Maximum spread | 2 | Set travelling spread from 1–8 tiles |
 | Gear theme | Mixed | Choose Bob, bronze, F2P, midgame, fashionscape, modern gear, or mixed outfits |
 | Show fan names | Off | Show simulated usernames above fans |
@@ -121,7 +133,7 @@ The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a su
 
 ## Installation
 
-Open RuneLite’s **Plugin Hub**, search for **Fame Simulator**, and click **Install**. If you still see **Celebrity Mode**, the rename is awaiting RuneLite maintainer review. Existing users receive the rename through the usual Hub update.
+Open RuneLite’s **Plugin Hub**, search for **Fame Simulator**, and click **Install**. Existing users receive approved updates through the Hub.
 
 To run it locally for development, use JDK 17 and the checked-in Gradle wrapper:
 

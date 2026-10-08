@@ -97,13 +97,13 @@ public final class CelebrityModePanel extends PluginPanel {
         JPanel crowd = section("Your crowd", "Changes apply while you play.");
         toggle(crowd, "Show crowd", "Hide or show your fans without losing your setup.",
                 "showCrowd", config::showCrowd);
-        number(crowd, "Fans", "crowdSize", 1, CrowdArrival.MAX_FANS, config::crowdSize, "fans");
+        number(crowd, "Fan limit", "crowdSize", 1, CrowdArrival.MAX_FANS, config::crowdSize, "fans max");
         JLabel scaleNote = hint("");
         crowd.add(scaleNote);
         crowd.add(Box.createVerticalStrut(8));
         refreshers.put("largeCrowdNote", () -> scaleNote.setText(html(config.crowdSize() > 30
                 ? "Large crowd: more overlap and rendering work. Try a wider spread."
-                : "A few loyal fans, or a crowd wherever you go.")));
+                : "A few loyal fans, or a crowd wherever you go. Attendance varies slightly over time.")));
         combo(crowd, "Formation", "formationStyle", FormationStyle.values(), config::formationStyle);
         combo(crowd, "Arrival pace", "arrivalPace", ArrivalPace.values(), config::arrivalPace);
         crowd.add(hint("Arrival pace applies to new fans. Hide and show the crowd to start a fresh entrance."));
@@ -330,7 +330,7 @@ public final class CelebrityModePanel extends PluginPanel {
         syncing = true;
         try {
             refreshers.values().forEach(Runnable::run);
-            summary.setText(config.showCrowd() ? config.crowdSize() + " fans · " + config.chatFrequency().name().toLowerCase(Locale.ENGLISH) : "Crowd hidden · settings saved");
+            summary.setText(config.showCrowd() ? "Up to " + config.crowdSize() + " fans · " + config.chatFrequency().name().toLowerCase(Locale.ENGLISH) : "Crowd hidden · settings saved");
             if (changedKey == null || "customQuotes".equals(changedKey) && !dirty) {
                 savedQuotes = config.customQuotes();
                 quotes.setText(savedQuotes);

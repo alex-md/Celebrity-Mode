@@ -26,7 +26,11 @@ import javax.swing.SwingUtilities;
 @PluginDescriptor(
         name = "Fame Simulator",
         description = "Feel famous in OSRS with your own simulated fan club, reactive crowd chatter, and optional fan PMs",
-        tags = {"fun", "cosmetic", "followers", "fans", "fame", "famous", "celebrity", "simulator", "creator", "video"})
+        tags = {
+            "fun", "cosmetic", "crowd", "followers", "fans", "npc", "fame", "famous",
+            "celebrity", "simulator", "simulation", "chat", "dialogue", "pm", "private messages",
+            "roleplay", "social", "streamer", "streaming", "screenshot", "video", "creator"
+        })
 public class CelebrityModePlugin extends Plugin {
     @Inject private Client client;
     @Inject private ClientThread clientThread;

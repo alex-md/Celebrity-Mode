@@ -29,7 +29,7 @@ public class FanDialogueGeneratorTest {
         assertTrue("Composed dialogue variety: " + lines.size(), lines.size() > 400);
         assertTrue(
                 "Names mixed with natural observations",
-                personalized > 1000 && personalized < 1950);
+                personalized > 200 && personalized < 1100);
     }
 
     @Test
@@ -70,9 +70,34 @@ public class FanDialogueGeneratorTest {
             lines.add(line);
         }
         assertTrue("Distinct composed lines: " + lines.size(), lines.size() > 2500);
-        assertTrue("Combat target observations", targets > 500);
+        assertTrue("Occasional combat target observations: " + targets, targets > 300);
         assertTrue("Situational health warnings", warning > 100);
         assertTrue("Actual skill observations", mining > 60);
+    }
+
+    @Test
+    public void overheadMessagesAreMostlyBriefWithoutRepeatedFollowupClauses() {
+        Random random = new Random(221);
+        int brief = 0, tiny = 0, longLines = 0, totalLength = 0, addressed = 0;
+        Set<String> structures = new HashSet<>();
+        for (int i = 0; i < 5000; i++) {
+            com.celebritymode.generation.FanUtterance utterance = FanDialogueGenerator.generateUtterance(
+                    random, FanPersonality.values()[i % 6], FanChatContext.idle("Zszima", ""));
+            String text = utterance.text;
+            structures.add(utterance.structure);
+            totalLength += text.length();
+            if (text.length() <= 40) brief++;
+            if (text.split(" ").length <= 5) tiny++;
+            if (text.length() > 60) longLines++;
+            if (text.toLowerCase(Locale.ENGLISH).contains("zszima")) addressed++;
+            assertFalse(text, text.contains("got plans for") || text.contains("looking forward to more"));
+        }
+        assertTrue("Most lines are short: " + brief, brief > 4000);
+        assertTrue("Mostly a few words: " + tiny, tiny > 3000);
+        assertTrue("Long comments stay occasional: " + longLines, longLines < 300);
+        assertTrue("Average length: " + totalLength / 5000.0, totalLength < 5000 * 30);
+        assertTrue("Substantive structure variety: " + structures.size(), structures.size() > 90);
+        assertTrue("Don't address the player in every line", addressed < 2500);
     }
 
     @Test
