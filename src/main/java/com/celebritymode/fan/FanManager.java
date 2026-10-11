@@ -147,6 +147,7 @@ public final class FanManager {
         instanceLayout = layout;
         boolean running = false;
         if (previous != null && !previous.equals(point)) {
+            if (stationaryTicks > 0) trail.beginTravelLeg();
             dx = Integer.signum(point.getX() - previous.getX());
             dy = Integer.signum(point.getY() - previous.getY());
             running = previous.distanceTo(point) >= 2;
@@ -194,7 +195,7 @@ public final class FanManager {
                 target = fan.position;
             } else if (gathering) {
                 target = formations.chooseIdleTarget(fan, point, reserved, random, tick);
-            } else if (stationaryTicks > 20 && fan.followTarget != null
+            } else if (stationaryTicks > 1 && fan.followTarget != null
                     && collision.canOccupy(fan.followTarget)) {
                 target = fan.followTarget;
             } else {
@@ -228,11 +229,13 @@ public final class FanManager {
             movement.render(fan, view, client.getGameCycle());
             movement.plan(fan, target, trail, running, view, client.getGameCycle(), gathering);
             if (fan.state == FanState.IDLE || fan.state == FanState.REACTION) {
-                if (fan.id % 5 != 0)
+                FanEntity partner = chat.conversationPartner(fan, tick);
+                WorldPoint facing = partner == null ? point : partner.position;
+                if (facing != null && (partner != null || fan.id % 5 != 0))
                     fan.targetOrientation =
                             OrientationUtil.facing(
-                                    point.getX() - fan.position.getX(),
-                                    point.getY() - fan.position.getY());
+                                    facing.getX() - fan.position.getX(),
+                                    facing.getY() - fan.position.getY());
             }
         }
         if (stopped && config.reactToEvents() && tick >= nextCrowdEmoteTick) {

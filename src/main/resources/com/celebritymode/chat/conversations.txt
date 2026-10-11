@@ -1,0 +1,147 @@
+# category|topic identity|opening alternatives|reply alternatives|closing alternatives
+social|snacks|anyone bring snacks?~snack break soon?|got a lobster~i brought burnt shrimp|fine dining~chef's special then
+social|bank-tabs|my bank is a disaster~bank tabs scare me|mine has a junk tab~i sort mine by colour|the whole bank is the junk tab~that's somehow worse
+social|quests|i actually read quest dialogue~any quest readers here?|spacebar goes brr~i read the first sentence|missing the best part~lore speedrun
+social|teleport|ever teleported to the wrong place?~wrong teleport gang?|daily~with all my gear, yes|glad it's not just me~scenic route unlocked
+social|music|sea shanty 2 or flute salad?~best track: sea shanty 2?|flute salad, easy~sea shanty forever|we can still be friends~strong opinions here
+social|pet-name|what would you name a pet rock?~need a name for my pet rock|dwayne~sir sediment|he has a title now~better name than mine
+social|one-more|one more trip then bed~last trip, probably|you said that an hour ago~famous last words|this one's different~don't quote me on that
+social|first-death|my first death was to a cow~a cow humbled me once|mine was a chicken~mine was the dark wizards|lumbridge builds character~we've all been there
+social|fashion|fashion over stats?~would you wear bad gear for the look?|always~depends how good the hat is|finally, my people~the hat stays on
+social|clue|i hoard clue scrolls~clues keep distracting me|do them!~could be your ranger boots|or twelve cabbages~hope is expensive
+social|chair|gielinor needs more benches~can we get a bench here?|i'd sit~my feet agree|premium bench content~new skill: sitting
+social|coins|found 3 gp on the floor~floor money counts right?|split please~we're rich|one gp each~retirement sorted
+social|cabbage|cabbages are underrated~cabbage appreciation moment|who invited draynor's farmer?~big cabbage propaganda|someone has to defend them~i stand by it
+social|map|i still get lost in varrock~varrock streets confuse me|follow the guards~same, every time|they don't know either~at least we're lost together
+social|sound|anyone play with sounds on?~game sounds on or off?|on, always~just the music|i hear clicks in my sleep~soundtrack carries
+social|lucky-item|anyone have a lucky item?~i keep my first bronze sword|my old boots~a completely normal cabbage|respect the ritual~don't question the cabbage
+social|duo|we should do a duo sometime~anyone up for a boss trip later?|only if you bring food~i'm the moral support|that's a role~excellent team composition
+social|irl|forgot my tea again~my coffee's gone cold|microwave it~that's the third cup|future me can deal with it~the grind claims another drink
+social|keyboard|my cat wants to play~cat's on the keyboard again|better stats than me~let them cook|new account owner~they're going for 99 naps
+social|home|lumbridge feels like home~lumbridge nostalgia hits|even the goblins?~especially the music|especially the goblins~might visit after this
+social|goals|what's everyone's next goal?~what are we working towards?|quest cape someday~a bank with empty spaces|both ambitious~we'll get there
+social|misclick|ever ate food by accident?~i misclick everything|ate my quest item once~buried my bones for a quest|that hurts~that's a special kind of pain
+social|party|this is a good little group~glad i tagged along|same, honestly~beats grinding alone|we're staying a while~good company, no rush
+social|exam|i know more item prices than maths~this game ate my brain|test us on rune prices~that's economics|put it on the cv~finally using my education
+social|cape|which cape looks best?~best looking cape?|fire cape for me~quest cape, easy|can't argue with that~solid choice
+social|shortcut|i love a good shortcut~agility shortcuts feel so good|until you fail it~until the level requirement|the fence wins again~back to the long way
+social|inventory|inventory full already~i brought too much again|drop the emotional baggage~you need all those teleports?|those are essential~i might need them
+social|timer|time flies here~how is it this late?|we started five minutes ago~don't check the clock|five runescape minutes~dangerous advice
+idle|waiting|what are we waiting for?~little breather?|just enjoying the view~no rush|fair, i'll hang out~works for me
+idle|clouds|that cloud looks like a dragon~anyone else cloud watching?|looks like a duck~that's definitely a lobster|a very dangerous duck~i see it now
+skilling|grind|{skill} with company is better~settling in for some {skill}?|i'll keep you company~we can hang out here|nice, no pressure~makes the time go quicker
+skilling|xp|xp or vibes today?~efficient or relaxed?|vibes~bit of both|excellent choice~sustainable gaming
+banking|supplies|did we forget anything?~bank check, everyone ready?|probably a teleport~i always forget something|check twice, run once~classic
+banking|hoarding|why do i keep every item?~my bank is a museum|might need it later~emotional attachment|that's how it starts~can't sell the memories
+combat|support|i'm on cheering duty~moral support reporting in|i'll supervise~i'll cheer too|very professional team~we've got this
+running|pace|whose idea was cardio?~this counts as exercise right?|yours actually~only for our characters|i retract my idea~close enough for me
+walking|tour|taking the scenic route?~little walking tour?|better than standing at the bank~i like this route|fair point~i'll tag along
+quiet|comfortable|pretty peaceful here~nice place to hang out|yeah, it is~no rush today|i could stay a bit~same here
+memer|boss-rock|that rock is looking at me~think i could fight a rock?|the rock would win~depends on its combat level|i'll train first~new boss confirmed
+beggar|loan|can someone lend me a lobster?~spare lobster anyone?|what happened to yours?~didn't you have one?|i ate the investment~short term liquidity issue
+screenshotter|photo|group photo sometime?~everyone look natural|this is my natural pose~do i stand here?|perfect, don't move~close enough
+excited|adventure|glad i came along~this is actually a fun trip|we haven't done anything yet~we just walked here|still counts~adventure is a mindset
+hypeman|team|solid crew we've got~best team right here|we're just hanging out~what's my job?|elite hanging out~keep morale up
+# More everyday chatter, friendly arguments, corrections and longer scenes.
+social|tea-again|tea break?~who wants tea?|mine's cold already~put the kettle on|standard~save me a mug
+social|pizza|pizza or kebab?~best late night food?|pizza for me~kebab, easy|bold choice~i respect it
+social|pineapple|pineapple on pizza?~pineapple pizza opinions?|absolutely~don't start this again|clan meeting immediately~we need a vote
+social|breakfast|forgot to eat breakfast~does coffee count as breakfast?|go get food~no, go eat|brb then~back in a minute
+social|chair-noise|my chair just made a noise~chair's complaining again|mine sounds like a door~chair needs a repair kit|new construction method~repair xp when
+social|laundry|anyone else avoiding laundry?~laundry pile is growing|mine can wait~mine's become a boss|what's its combat level?~bring a team
+social|dog|dog wants a walk~brb walking the dog|tell them gz~they have better pathing|will do~back after the real agility course
+social|delivery|food just arrived~doorbell, brb|protecting your tile~don't forget your drink|back, food secured~supplies replenished
+social|wrong-chat|oops wrong chat~that was meant for the cc|we saw nothing~your secret's safe|cheers~pretend that didn't happen
+social|autocorrect|autocorrect hates me~my phone changed runes to prunes|prayer prunes~new meta unlocked|bring a full inventory~we're never calling them runes again
+social|typo-cape|nice capr~love the capr|cape?~what's a capr?|cape*~cape, fingers failed me
+social|typo-fishing|i love fsihing~fsihing is peaceful|new skill?~how do i train fsihing?|fishing*~you know what i meant
+social|typo-friend|glad we're freinds~good freinds here|freinds forever~even the spelling's close|friends*~don't make me spell it again
+social|keyboard-stuck|@@@@@@~@@@@@@@@@|your shift key ok?~we heard you lol|sorry got excited~shift key's working overtime
+social|keyboard-cheer|@@@@@@@@~@@@@@|@@@@@@@~@@@@@@@@@@|okay we got it~very normal crowd
+social|keyboard-cat|asdfghjk~ajskdjsk|cat again?~excellent point|yes, cat again~sorry keyboard moment
+social|keyboard-caps|WHY AM I SHOUTING~HI EVERYONE|caps lock mate~inside voices please|oh sorry~found the button
+social|afk-return|back~back, what did i miss?|we solved nothing~a very serious cabbage debate|sounds about right~carry on then
+social|misread|i read that completely wrong~wait, read that again|happens to me daily~take your time|okay got it now~eyes working again
+social|trade-joke|selling my attention span~buying focus|best i can do is 3 gp~i'm out of stock|terrible market~guess we're both broke
+social|flour|why is flour in my bank?~bank audit: 40 pots of flour|baking empire~emergency bread|finally a purpose~the bread rebuild begins
+social|hammer|i own about ten hammers~keep buying hammers|never find one when needed~put them in one tab|that's the problem~then i'd lose the tab
+social|holiday|where would you holiday here?~gielinor holiday destination?|catherby~somewhere without spiders|solid choice~pack a teleport
+social|town-debate|best town?~favourite town to bank in?|falador~ardy for me|i'm a catherby person~fair, good scenery
+social|weather|always sunny here~does it ever rain here?|don't tempt it~my cape isn't waterproof|bring a bucket~umbrella slot when
+social|spider|there's a spider by my desk~irl spider encounter|log out and run~give it the keyboard|it can finish my task~new slayer partner
+social|wiki-tabs|how many wiki tabs is too many?~i have 19 wiki tabs open|twenty~those are rookie numbers|i feel better now~opening another
+social|mouse|mouse battery's dying~mouse just stopped moving|charge it!~emergency keyboard gaming|back, plugged it in~crisis over
+social|monitor|i keep cleaning my screen~fingerprint on my monitor again|stop pointing at loot~i thought that was a dot on the map|oh that's what it was~new discovery
+social|sleep|i should get some sleep~bedtime was an hour ago|we'll be here tomorrow~log off, mate|one sensible suggestion~yeah, fair
+social|water|water check~anyone remembered water?|good shout~refilling now|same, brb~stay hydrated crew
+social|stretch|stretch break anyone?~my shoulder needs a break|standing up now~yes please|back, better~worth it
+social|skill-sounds|best skilling sound?~favourite sound in the game?|woodcutting~fishing splash|solid pick~could listen for hours
+social|first-account|my first name was terrible~first username regrets?|mine had six numbers~mine had x's everywhere|we've grown~elite naming era
+social|password|remember typing with two fingers?~i used to type so slowly|still do~the keyboard's a maze|respect the method~no rush, we're waiting
+social|old-map|i miss getting lost as a kid~used to think varrock was massive|it still feels big~i got lost yesterday|nostalgia lives on~same account, same navigation
+social|achievement-name|bankstanding achievement when?~need a cape for standing here|we'd all have it~finally my skill|trimmed on day one~world first crew
+social|compliment|{friend}, nice outfit~{friend}, that hat works|cheers mate~thanks, spent ages on it|worth the effort~looks good
+social|recognize-friend|seen you around before?~{friend}, same world yesterday?|probably, i hang out here~yeah, think so|small world~good seeing you again
+social|dance|dance break?~anyone up for a dance?|not with these knees~i only know one emote|that's enough~perfect, we're qualified
+social|team-name|we need a team name~what do we call this group?|the bank inspectors~the misplaced teleports|put it on a cape~excellent branding
+social|riddle|what has no xp and many fans?~riddle: no xp, great company?|this tile?~us right now?|correct~full marks
+social|race|race to the next bank?~friendly race sometime?|walking only~only if we know the route|that's more my pace~navigation decides it
+social|lost-item|where's my favourite hat?~can't find my hat anywhere|check your head~check your bank|oh. wearing it~found it, thanks
+social|pretend-guide|welcome to my walking guide~step one: stand here|what's step two?~taking notes|wait for step three~move eventually
+social|boredom|was getting bored before this~this beats solo bankstanding|same here~company helps|glad i stayed~good little session
+social|music-stuck|song stuck in my head~sea shanty won't leave my brain|now it's in mine~hum it louder|sorry about that~shared suffering
+social|sandwich|sandwich break soon~made an excellent sandwich|what's in it?~sandwich review please|mostly cheese~cheese, obviously
+social|budget|saving gp or spending gp?~how's everyone's rebuild?|saving, allegedly~spent it on fashion|valid expense~financial advice revoked
+social|tiny-profit|made 12 gp today~massive 12 gp profit|don't spend it all~teach me this method|members guide only~that's the whole guide
+social|lucky-world|this is my lucky world~got a favourite world?|the one my friends use~whichever isn't full|best answer~hard to argue
+social|camera|camera angle opinions?~top down or low camera?|i rotate it constantly~top down, easier|cinematic gaming~director's cut
+social|minimap|i navigate by vibes~minimap? never heard of it|explains a lot~we're definitely getting lost|scenic detour~all part of the tour
+social|duplicate|we've got matching boots~same boots, {friend}|good taste~accidental uniform|boot club~club dues are optional
+social|enough-tabs|i found my bank junk tab~bank cleanup update|how big was it?~did you sell anything?|the entire bank~three potatoes, kept everything else
+social|mystery-box|what's in this bank tab?~forgot what's in tab seven|bad decisions~quest stuff probably|both correct~archaeology time
+social|snowball|someone tell a joke~need a terrible joke|my cash stack~my pathing skills|painfully relatable~that's less joke, more documentary
+social|shoes|these boots have seen things~boots need a break|mostly bank floors~that's a lot of standing|rugged adventuring~battle-tested tiles
+social|logout-plan|log off at a round number?~i stop at round xp numbers|then another round number~dangerous habit|an endless method~that's how they get you
+social|long-pizza|pizza or kebab?~food debate again?|pizza~kebab|explain your choice~defend that answer|portable, easy~comfort food, obviously|fair enough~okay i'm hungry now
+social|long-map|i know a shortcut~follow me, shortcut time|are you sure?~is this another fence?|mostly~confident enough|last time was a swamp~we ended up lost last time|different shortcut this time~okay, normal route then
+social|long-loan|can i borrow 1 gp?~small financial request|what for?~state your business|funding my empire~startup capital|what's the business?~how's the plan looking?|standing here professionally~still in development
+social|long-typo|i'm going to the bnak~need the bnak|the what?~new town?|bank*~bank, typo|i prefer bnak~bnak sounds better|fine, bnak it is~put it on the map
+social|long-cheering|@@@@@@@~@@@@@@@@|@@@@@@~@@@@@@@@@@|your keyboard needs a rest~save some @s for later|we have plenty~there's a whole key of them|budget the @s responsibly~put half in the bank
+social|long-gear|i bought new boots~fashionscape update|how much?~nice, what'd they cost?|too much~i won't say|that much huh~worth it though?|they squeak less~absolutely, look at them
+idle|idle-guard|i'll guard this tile~on tile-watch duty|from what?~what's the threat?|other tiles~unauthorised bankstanding
+idle|idle-seat|saved you a spot~{friend}, space here|cheers~perfect|excellent tile, good view~five star accommodation
+idle|idle-plans|any plans after this?~what's next for everyone?|probably a farm run~might do a quest|good luck with it~i'll stick around till then
+idle|idle-silence|comfortable silence?~quiet minute?|sounds good~yeah, no rush|nice~i like this group
+banking|bank-loadout|why did i bring three pickaxes?~loadout review needed|backup backup pickaxe~one for each hand?|very prepared~spare hand arriving soon
+banking|bank-token|found an old quest item~bank archaeology update|don't drop it yet~wiki first|good call~leaving it in the museum
+banking|bank-food|food packed?~supplies checklist?|yes, probably too much~i ate one while banking|classic~pack an extra
+skilling|skill-click|{skill} gets hypnotic~another {skill} session|good background activity~nice with music|and decent company~we're staying for a bit
+skilling|skill-goal|small goals or big goals?~how do you plan a grind?|one level at a time~just a little each day|keeps it manageable~i like that approach
+skilling|skill-pace|no rush on {skill}~chill {skill} time|steady progress~still counts|best kind of session~good company helps
+combat|combat-roles|who's doing what?~team roles please|i'm on snacks~i'm the commentator|vital role~don't forget morale
+combat|combat-coach|my advice: don't get hit~combat coaching available|revolutionary~write that down|lesson two costs gp~that's my whole guide
+running|run-stamina|who forgot stams?~stamina check?|me, obviously~i thought someone else packed them|walking break then~we'll wait
+running|run-laces|hold up, shoelace~boot situation here|these boots have laces?~take your time|they do now~back, fixed it
+walking|walk-tourguide|on your left: a tree~welcome to the walking tour|what's on the right?~very informative|another tree~more excellent trees
+walking|walk-company|glad we're walking~nice change of pace|time to chat~less rushing|exactly~good little wander
+quiet|quiet-friend|{friend}, good to see you~nice having people around|same here~glad you joined|i'll stick around~no rush
+memer|meme-rock|rock check~rock inspection time|yep, rock~solid specimen|certified rock~report filed
+memer|meme-xp|standing xp when?~training standing to 99|you're already maxed~cape would be invisible|excellent fashionscape~efficiency unlocked
+beggar|beggar-business|selling compliments~compliments for 1 gp|what's the free trial?~demo please|nice boots~great hat
+screenshotter|photo-blink|group pic, don't blink~picture time, stay still|i blinked~oops, moved|one more then~classic
+screenshotter|photo-angle|best side, everyone~camera angle check|i have a worst side~all my sides are the same|we'll work with it~great, less rotating
+excited|excited-caps|I FOUND THE CAPS KEY~HI CREW|we noticed~loud and clear|VERY EXCITING~sorry sorry
+hypeman|hype-small|small wins count~another little step done|good reminder~progress is progress|we keep going~steady crew
+# Shared details are rolled once per exchange, so later replies keep the same subject.
+social|dynamic-snack|anyone got {snack}?~{snack} break?|i could go for {snack}~now i want some|snack committee formed~brb, checking the cupboard
+social|dynamic-drink|{drink} gone cold again~time for {drink}|fresh cup incoming~mine too|{drink} club~back after a refill
+social|dynamic-town|best thing about {town}?~{town} appreciation moment|the music~just feels familiar|good place for a wander~might visit after this
+social|dynamic-boss|favourite thing about {boss}?~anyone enjoy {boss}?|the part where i leave~watching other people do it|strong review~honest answer
+social|dynamic-pet|my {pet} stole my chair~{pet} is supervising|promote them~they're in charge now|account management sorted~new team leader
+social|dynamic-chores|avoiding {chore} today~{chore} can wait|future you's problem~same here|future me is furious~we'll deal with it later
+social|dynamic-long-snack|who packed {snack}?~need a {snack} break|not me~i thought you did|this was your job~we had one job|delegation failed~snack shortage confirmed|fine, i'm getting some~brb on a supply run
+social|dynamic-long-town|trip to {town} later?~anyone fancy {town}?|what for?~what's the plan?|just a wander~music and a bank visit|that's a valid plan~i'll tag along|{town} crew assembled~bring walking shoes
+social|dynamic-long-drink|need more {drink}~{drink} supply low|how many cups today?~another cup?|we don't count those~that's private information|that many then~understood, no further questions|drinks audit cancelled~excellent, brb
+social|dynamic-long-boss|{boss} tips anyone?~how do you learn {boss}?|start with a guide~take it slow|okay, after this~sounds manageable|bring supplies too~practice helps|good shout~i'll give it a go
+social|dynamic-long-chores|i should do {chore}~{chore} is calling|five more minutes~we'll still be here|that's what i said earlier~tempting offer|go on, get it done~small chore break|brb then~back after that
+social|dynamic-long-pet|my {pet} is watching~{pet} wants to join|can they tank?~what's their role?|morale support~snack inspection|highly qualified~perfect fit|welcome to the group~you're hired

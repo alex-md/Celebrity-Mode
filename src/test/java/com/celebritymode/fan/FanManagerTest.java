@@ -523,6 +523,83 @@ public class FanManagerTest {
     }
 
     @Test
+    public void settledFollowersDoNotRunBackThroughOldBreadcrumbsWhenTravelResumes() {
+        int[][] directions = {{1, 0}, {-1, 0}, {0, 1}, {0, -1},
+                {1, 1}, {1, -1}, {-1, 1}, {-1, -1}};
+        for (int speed : new int[] {1, 2}) {
+            for (FormationStyle style : FormationStyle.values()) {
+                for (int[] direction : directions) {
+                    TestScene scene = new TestScene();
+                    scene.config.formation = style;
+                    scene.config.size = 8;
+                    // Isolate stale destinations from legitimate personal-space repositioning.
+                    scene.config.space = false;
+                    scene.config.arrival = ArrivalPace.INSTANT;
+                    scene.tick();
+                    for (int i = 0; i < 8; i++) {
+                        scene.playerPosition = FormationPlanner.offset(scene.playerPosition,
+                                direction[0] * speed, direction[1] * speed);
+                        scene.tick();
+                    }
+                    for (int i = 0; i < 20; i++) scene.tick();
+                    for (int i = 0; i < 5; i++) {
+                        Map<Integer, WorldPoint> before = new HashMap<>();
+                        for (FanEntity fan : scene.manager.getFans()) before.put(fan.id, fan.position);
+                        scene.playerPosition = FormationPlanner.offset(scene.playerPosition,
+                                direction[0] * speed, direction[1] * speed);
+                        scene.tick();
+                        for (FanEntity fan : scene.manager.getFans()) {
+                            WorldPoint start = before.get(fan.id);
+                            int forward = (fan.position.getX() - start.getX()) * direction[0]
+                                    + (fan.position.getY() - start.getY()) * direction[1];
+                            assertTrue("Follower " + fan.id + " backtracks in " + style
+                                    + " heading " + Arrays.toString(direction) + " speed " + speed
+                                    + " tick " + i + " from " + start + " to " + fan.position
+                                    + " target " + fan.target, forward >= 0);
+                        }
+                    }
+                    scene.manager.cleanup();
+                }
+            }
+        }
+    }
+
+    @Test
+    public void runningCrowdHasStableDestinationsAndNoStopStartCatchup() {
+        for (FormationStyle style : FormationStyle.values()) {
+            TestScene scene = new TestScene();
+            scene.config.formation = style;
+            scene.config.size = 30;
+            scene.config.arrival = ArrivalPace.INSTANT;
+            scene.tick();
+            for (int i = 0; i < 8; i++) {
+                scene.playerPosition = FormationPlanner.offset(scene.playerPosition, 0, 2);
+                scene.tick();
+            }
+            scene.tick();
+            Map<Integer, WorldPoint> destinations = new HashMap<>();
+            for (FanEntity fan : scene.manager.getFans()) destinations.put(fan.id, fan.target);
+            int advances = 0;
+            for (int i = 0; i < 18; i++) {
+                Map<Integer, WorldPoint> positions = new HashMap<>();
+                for (FanEntity fan : scene.manager.getFans()) positions.put(fan.id, fan.position);
+                scene.tick();
+                for (FanEntity fan : scene.manager.getFans()) {
+                    assertEquals("Stop destination stays fixed in " + style,
+                            destinations.get(fan.id), fan.target);
+                    WorldPoint prior = positions.get(fan.id);
+                    if (!prior.equals(fan.target)) {
+                        assertNotEquals("Catchup advances every tick in " + style, prior, fan.position);
+                        advances++;
+                    } else assertEquals("Settled followers stay put", prior, fan.position);
+                }
+            }
+            assertTrue("Exercise catching up in " + style, advances > 0);
+            scene.manager.cleanup();
+        }
+    }
+
+    @Test
     public void recentlyStoppedTrainKeepsFollowingThenMinorityGathersAndResumes() {
         TestScene scene = new TestScene();
         scene.config.size = 100;

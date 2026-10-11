@@ -11,6 +11,7 @@ import java.util.*;
 public final class MovementTrail {
     private final Deque<WorldPoint> points = new ArrayDeque<>();
     private final int capacity;
+    private int travelLength;
 
     public MovementTrail() {
         this(80);
@@ -19,11 +20,13 @@ public final class MovementTrail {
     public MovementTrail(int capacity) {
         if (capacity < 1) throw new IllegalArgumentException("capacity");
         this.capacity = capacity;
+        travelLength = capacity;
     }
 
     public void update(WorldPoint point) {
         if (point == null || point.equals(points.peekFirst())) return;
         points.addFirst(point);
+        travelLength = Math.min(capacity, travelLength + 1);
         while (points.size() > capacity) points.removeLast();
     }
 
@@ -32,6 +35,15 @@ public final class MovementTrail {
         int i = 0;
         for (WorldPoint p : points) if (i++ >= Math.max(0, delay)) return p;
         return points.peekLast();
+    }
+
+    /** Start formation delays at the stop position without discarding collision-routing history. */
+    public void beginTravelLeg() {
+        travelLength = points.isEmpty() ? 0 : 1;
+    }
+
+    public WorldPoint getFollowingPoint(int delay) {
+        return getDelayedPoint(Math.min(Math.max(0, delay), Math.max(0, travelLength - 1)));
     }
 
     public WorldPoint getLatest() {
@@ -48,5 +60,6 @@ public final class MovementTrail {
 
     public void clear() {
         points.clear();
+        travelLength = capacity;
     }
 }

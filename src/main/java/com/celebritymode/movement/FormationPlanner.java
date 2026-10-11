@@ -47,7 +47,8 @@ public class FormationPlanner {
                                 : style == FormationStyle.LOOSE_CROWD
                                         ? 1 + fan.trailOffset / 2
                                         : 1 + fan.trailOffset / 3;
-        WorldPoint anchor = trail.getDelayedPoint(Math.max(0, delay - stationaryTicks / 2));
+        // On stopping, choose the final destination once; do not release breadcrumbs on a timer.
+        WorldPoint anchor = trail.getFollowingPoint(stationaryTicks > 0 ? 0 : delay);
         if (anchor == null) anchor = player;
         // Each follower has its own persistent angle and depth, independent of list index/rows.
         double angle = fan.id * 2.399963229728653 + 0.71;
@@ -64,7 +65,9 @@ public class FormationPlanner {
                         (int) Math.round(-hx * behind - hy * lateral),
                         (int) Math.round(-hy * behind + hx * lateral));
         WorldPoint best =
-                valid(preferred, player, reserved) && connected(anchor, preferred)
+                valid(preferred, player, reserved)
+                                && (stationaryTicks == 0 || preferred.distanceTo(player) <= spread + 3)
+                                && connected(anchor, preferred)
                         ? preferred
                         : null;
         // Fixed search budget, independent of scene size; prefer unique tiles then sharing.
@@ -79,6 +82,7 @@ public class FormationPlanner {
                                             + hx * (p.getY() - anchor.getY()));
                     if (lateralDistance <= spread * (Math.abs(hx) + Math.abs(hy))
                             && valid(p, player, reserved)
+                            && (stationaryTicks == 0 || p.distanceTo(player) <= spread + 3)
                             && connected(anchor, p)) best = p;
                 }
         if (best == null && collision.canOccupy(anchor)) best = anchor;

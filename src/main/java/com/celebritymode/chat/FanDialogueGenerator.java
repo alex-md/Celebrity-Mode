@@ -99,6 +99,8 @@ public final class FanDialogueGenerator {
 
     static FanUtterance generateUtterance(
             Random random, FanPersonality personality, FanChatContext context, int lengthRoll) {
+        FanUtterance keyboard = ChatTypingStyle.keyboard(random, personality);
+        if (keyboard != null) return keyboard;
         String category;
         int roll = random.nextInt(100);
         if (context.lowHealth && roll < 20) category = "low_health";
@@ -120,11 +122,13 @@ public final class FanDialogueGenerator {
                     random.nextBoolean()
                             ? "social"
                             : personality.name().toLowerCase(Locale.ENGLISH);
-        if (lengthRoll >= 90) return lineUtterance(category, context, random, true);
-        return QuickChatComposer.generate(random, personality.name(), context.player, category,
+        FanUtterance line = lengthRoll >= 90 ? lineUtterance(category, context, random, true)
+                : QuickChatComposer.generate(random, personality.name(), context.player, category,
                 context.gear.toLowerCase(Locale.ENGLISH), context.target,
                 context.skill == null ? "" : context.skill.getName().toLowerCase(Locale.ENGLISH),
                 lengthRoll < 80);
+        return ChatTypingStyle.apply(line, random, personality, context.player, context.target, context.gear,
+                context.skill == null ? "" : context.skill.getName());
     }
 
     public static String level(FanChatContext context, Random random) {

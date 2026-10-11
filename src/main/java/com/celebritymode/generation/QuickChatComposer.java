@@ -7,11 +7,11 @@ public final class QuickChatComposer {
     private static final String[] SHOCK = {
         "omg", "no way", "wait", "nah", "hold up", "what", "wtf", "wow", "oh wow", "wait what",
         "oh damn", "wait a sec", "no shot", "yooo", "oh", "damn", "wait fr", "huh", "nahhh",
-        "omfg"
+        "omfg", "wait a minute", "ayo", "ooh", "bruhh", "okay wow", "sheesh"
     };
     private static final String[] HELLO = {
         "hi", "hey", "yo", "hello", "sup", "heyy", "hiya", "hey hey", "hii", "yoo", "hi hi",
-        "heya", "what's up", "hello hello", "yo yo", "hey there"
+        "heya", "what's up", "hello hello", "yo yo", "hey there", "evening", "hiya mate", "heyyy", "morning", "sup crew"
     };
     private static final String[] ADDRESS = {
         "bro", "dude", "mate", "man", "yo", "hey", "my guy", "boss", "bruh", "homie"
@@ -49,6 +49,7 @@ public final class QuickChatComposer {
     private static final String[] ACTION = {
         "bankstanding", "following", "lurking", "taking notes", "watching", "tagging along",
         "vibing", "waiting", "chilling", "hanging out", "spectating", "wandering", "catching up",
+        "snacking", "people watching", "avoiding chores", "stretching", "procrastinating", "listening to music",
         "saying hi", "passing through", "getting a pic"
     };
     private static final String[] CERTAINTY = {
@@ -71,7 +72,30 @@ public final class QuickChatComposer {
         "{praise} {topic}", "{topic} check", "{address} your {topic}", "{topic} goal?",
         "{shock} that {topic}", "need a {role}?", "i'll bring {item}", "who's on {content}?",
         "{content} with {place}?", "{request} for {place}", "{address} that {topic}",
-        "{place} says {hello}", "one more {keepsake}", "{certainty} {action}", "{address} gl on {goal}"
+        "{place} says {hello}", "one more {keepsake}", "{certainty} {action}", "{address} gl on {goal}",
+        "{snack} break?", "anyone brought {snack}?", "{snack} acquired", "need more {snack}",
+        "{snack} review: {praise}", "brb getting {snack}", "forgot my {drink}", "{drink} went cold",
+        "{drink} check", "refilling my {drink}", "{drink} and {action}", "{pet} on the keyboard",
+        "my {pet} wants attention", "{pet} is supervising", "{pet} stole my chair",
+        "{distraction} can wait", "avoiding {distraction}", "back after {distraction}",
+        "{distraction} interrupted me", "{town} later?", "i always get lost in {town}",
+        "{town} nostalgia", "miss hanging out in {town}", "best music in {town}",
+        "any {content} learners here?", "{content} after snacks", "{goal} eventually",
+        "saving for {goal}", "{item} packed", "forgot my {item} again", "one inventory of {item}",
+        "i swear i packed {item}", "{topic} looking {praise}", "{topic} appreciation club",
+        "{role} reporting in", "volunteer {role}", "i'm on {role} duty", "{keepsake} quality: {praise}",
+        "{place} would love this", "{place} on tour", "{place} needs a snack break",
+        "the {action} continues", "professional {action}", "{action} with witnesses",
+        "{action} pays zero gp", "brb, doorbell", "back, what did i miss?", "water break",
+        "stretch break", "lost my train of thought", "wrong chat sorry", "missed a key there",
+        "keyboard behaving badly", "my mouse needs charging", "why is my inventory full",
+        "found my old boots", "excellent company here", "this beats solo grinding",
+        "glad i tagged along", "who brought the snacks", "saving this tile for a friend",
+        "anyone else avoiding chores", "music on, brain off", "comfortable little crowd",
+        "need a bank cleanup", "one more trip, probably", "did someone say food",
+        "chair's making noises again", "anyone seen my focus", "checking the wiki again",
+        "forgot why i logged in", "same boots gang", "spare a chair?", "i live on this tile",
+        "social xp incoming", "taking the scenic route", "how's everyone's day?"
     };
     private static final String[] MEDIUM = {
         "{place} won't believe i found you", "i was doing {excuse} before this",
@@ -175,6 +199,14 @@ public final class QuickChatComposer {
                 "collection log", "skill total", "outfit", "stats", "loot", "kc", "combat level", "clue luck"}, random));
         slots.put("role", pick(new String[] {"duo", "tank", "third", "learner", "healer", "carry", "teammate"}, random));
         slots.put("keepsake", pick(new String[] {"pic", "screenshot", "group pic", "photo"}, random));
+        slots.put("snack", pick(new String[] {"toast", "biscuits", "crisps", "pizza", "sandwiches",
+                "noodles", "popcorn", "leftovers", "cheese", "chocolate"}, random));
+        slots.put("drink", pick(new String[] {"tea", "coffee", "water", "hot chocolate", "juice"}, random));
+        slots.put("pet", pick(new String[] {"cat", "dog", "kitten", "puppy", "rabbit"}, random));
+        slots.put("distraction", pick(new String[] {"laundry", "the dishes", "homework", "a doorbell",
+                "my phone", "an email", "tidying up", "my shopping list"}, random));
+        slots.put("town", pick(new String[] {"lumbridge", "varrock", "catherby", "falador", "ardy",
+                "yanille", "draynor", "seers", "canifis", "rimmington"}, random));
         slots.put("gear", gear);
         slots.put("target", target);
         slots.put("skill", skill);
