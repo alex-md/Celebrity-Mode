@@ -26,7 +26,9 @@ public final class CelebrityModeOverlay extends Overlay {
         this.config = config;
         this.manager = manager;
         setPosition(OverlayPosition.DYNAMIC);
-        setLayer(OverlayLayer.ABOVE_SCENE);
+        // The local player and native overheads can render after ABOVE_SCENE.
+        // Draw text in the later 2D pass, while keeping game interfaces above it.
+        setLayer(OverlayLayer.UNDER_WIDGETS);
     }
 
     @Override

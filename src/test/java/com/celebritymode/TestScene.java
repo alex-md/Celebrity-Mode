@@ -14,6 +14,7 @@ import java.util.*;
 public final class TestScene {
     public int baseX = 3200, baseY = 3200, plane, viewId = -1, cycle, modelBuilds;
     public final List<Integer> loadedAnimations = new ArrayList<>();
+    public final List<Integer> loadedModelIds = new ArrayList<>();
     public boolean bodyCacheReady = true, unsupportedEquipment;
     public int textureCloneCalls;
     public short[] faceTextures;
@@ -175,7 +176,9 @@ public final class TestScene {
                                 case "getIndexConfig":
                                     return index;
                                 case "mergeModels":
+                                    return mesh[0];
                                 case "loadModelData":
+                                    loadedModelIds.add((int) a[0]);
                                     return mesh[0];
                                 case "loadAnimation":
                                     loadedAnimations.add((int) a[0]);
@@ -225,10 +228,10 @@ public final class TestScene {
     }
 
     public static final class MutableConfig implements CelebrityModeConfig {
-        public int size = 8;
+        public int size = 8, spread = 2;
         public boolean show = true;
         public com.celebritymode.fan.ArrivalPace arrival = com.celebritymode.fan.ArrivalPace.GRADUAL;
-        public FormationStyle formation = FormationStyle.ENTOURAGE;
+        public FormationStyle formation = FormationStyle.LOOSE_CROWD;
         public boolean space = true;
         public FanGearTier gear = FanGearTier.DEFAULT_BOB;
 
@@ -242,6 +245,9 @@ public final class TestScene {
         public int crowdSize() {
             return size;
         }
+
+        @Override
+        public int maxSpread() { return spread; }
 
         @Override
         public FormationStyle formationStyle() {

@@ -17,7 +17,7 @@ final class PanelFixture implements CelebrityModeConfig {
     public int crowdSize() { return (Integer) values.getOrDefault("crowdSize", 8); }
     public boolean showCrowd() { return (Boolean) values.getOrDefault("showCrowd", true); }
     public ArrivalPace arrivalPace() { return (ArrivalPace) values.getOrDefault("arrivalPace", ArrivalPace.GRADUAL); }
-    public FormationStyle formationStyle() { return (FormationStyle) values.getOrDefault("formationStyle", FormationStyle.ENTOURAGE); }
+    public FormationStyle formationStyle() { return (FormationStyle) values.getOrDefault("formationStyle", FormationStyle.LOOSE_CROWD); }
     public int maxSpread() { return (Integer) values.getOrDefault("maxSpread", 2); }
     public boolean respectPersonalSpace() { return (Boolean) values.getOrDefault("respectPersonalSpace", true); }
     public FanGearTier crowdGearTier() { return (FanGearTier) values.getOrDefault("crowdGearTier", FanGearTier.MIXED); }

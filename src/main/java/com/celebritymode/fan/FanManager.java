@@ -147,7 +147,15 @@ public final class FanManager {
         instanceLayout = layout;
         boolean running = false;
         if (previous != null && !previous.equals(point)) {
-            if (stationaryTicks > 0) trail.beginTravelLeg();
+            if (stationaryTicks > 0) {
+                trail.beginTravelLeg();
+                for (FanEntity fan : fans) {
+                    fan.nextFollowTick = tick + Math.floorMod(fan.id * 37 + fan.trailOffset, 5);
+                    // Wait in place while noticing the player leaving, never backtrack
+                    // toward a stale destination from the preceding travel leg.
+                    fan.followTarget = fan.position;
+                }
+            }
             dx = Integer.signum(point.getX() - previous.getX());
             dy = Integer.signum(point.getY() - previous.getY());
             running = previous.distanceTo(point) >= 2;
@@ -159,7 +167,7 @@ public final class FanManager {
             stationaryTicks = 0;
             for (FanEntity fan : fans) {
                 fan.idleTarget = null;
-                fan.followTarget = null;
+                fan.stopTargetChosen = false;
             }
         } else stationaryTicks++;
         trail.update(point);
@@ -186,6 +194,12 @@ public final class FanManager {
         boolean stopped = stationaryTicks >= 25;
         Set<WorldPoint> reserved = new HashSet<>();
         for (FanEntity fan : fans) if (fan.position != null) reserved.add(fan.position);
+        int idleWalkers = 0;
+        for (FanEntity fan : fans)
+            if (fan.idleTarget != null && fan.position != null
+                    && (fan.movementPath != null || !fan.position.equals(fan.idleTarget))) idleWalkers++;
+        int idleWalkLimit = Math.max(1, (fans.size() + 9) / 10);
+        boolean idleWalkStarted = false;
         for (FanEntity fan : fans) {
             if (!fan.arrived && tick < fan.arrivalTick) continue;
             if (fan.position != null) reserved.remove(fan.position);
@@ -193,14 +207,26 @@ public final class FanManager {
             WorldPoint target;
             if (fan.state == FanState.REACTION && stationaryTicks > 0) {
                 target = fan.position;
-            } else if (gathering) {
-                target = formations.chooseIdleTarget(fan, point, reserved, random, tick);
-            } else if (stationaryTicks > 1 && fan.followTarget != null
-                    && collision.canOccupy(fan.followTarget)) {
+            } else if (gathering && fan.position != null) {
+                boolean alreadyWalking = fan.idleTarget != null
+                        && (fan.movementPath != null || !fan.position.equals(fan.idleTarget));
+                target = formations.chooseIdleTarget(fan, point, reserved, random, tick,
+                        idleWalkers < idleWalkLimit && !idleWalkStarted);
+                if (!alreadyWalking && target != null && !target.equals(fan.position)) {
+                    idleWalkers++;
+                    idleWalkStarted = true;
+                }
+            } else if (fan.followTarget == null && fan.position != null && tick < fan.nextFollowTick) {
+                target = fan.position;
+            } else if (fan.followTarget != null
+                    && collision.canOccupy(fan.followTarget)
+                    && (tick < fan.nextFollowTick || (stationaryTicks > 0 && fan.stopTargetChosen))) {
                 target = fan.followTarget;
             } else {
                 target = formations.chooseTarget(
                         fan, point, dx, dy, trail, reserved, stationaryTicks);
+                fan.nextFollowTick = tick + 1 + Math.floorMod(fan.id * 17 + fan.trailOffset, 3);
+                if (stationaryTicks > 0) fan.stopTargetChosen = true;
             }
             if (!gathering && fan.state != FanState.REACTION) fan.followTarget = target;
             if (target != null) reserved.add(target);
@@ -230,6 +256,7 @@ public final class FanManager {
             movement.plan(fan, target, trail, running, view, client.getGameCycle(), gathering);
             if (fan.state == FanState.IDLE || fan.state == FanState.REACTION) {
                 FanEntity partner = chat.conversationPartner(fan, tick);
+                if (partner == null && gathering) partner = idleCompanion(fan);
                 WorldPoint facing = partner == null ? point : partner.position;
                 if (facing != null && (partner != null || fan.id % 5 != 0))
                     fan.targetOrientation =
@@ -259,6 +286,22 @@ public final class FanManager {
             }
             recognitionPending = false;
         }
+    }
+
+    /** Face a nearby member of the same little group between walks. */
+    private FanEntity idleCompanion(FanEntity fan) {
+        FanEntity closest = null;
+        int distance = 4;
+        for (FanEntity other : fans) {
+            if (other == fan || other.id / 4 != fan.id / 4 || other.idleTarget == null
+                    || other.position == null || !other.isVisible() || other.state != FanState.IDLE) continue;
+            int separation = fan.position.distanceTo(other.position);
+            if (separation > 0 && separation < distance) {
+                closest = other;
+                distance = separation;
+            }
+        }
+        return closest;
     }
 
     private int nearbyPlayers(WorldView current) {
@@ -291,7 +334,7 @@ public final class FanManager {
         fan.object.setLocation(fan.renderLocation, plane);
         fan.object.setOrientation(fan.orientation);
         animations.setState(fan, FanState.IDLE);
-        fan.nextWanderTick = tick + 100 + random.nextInt(200);
+        fan.nextWanderTick = tick + 15 + random.nextInt(45);
         fan.object.setActive(true);
     }
 
@@ -381,6 +424,8 @@ public final class FanManager {
                 for (FanEntity fan : fans) {
                     fan.followTarget = null;
                     fan.idleTarget = null;
+                    fan.nextFollowTick = tick + Math.floorMod(fan.id * 37, 5);
+                    fan.stopTargetChosen = false;
                 }
                 break;
             case "chatFrequency":

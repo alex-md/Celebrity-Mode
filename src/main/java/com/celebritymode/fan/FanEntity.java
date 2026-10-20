@@ -14,7 +14,8 @@ public final class FanEntity {
     public int formationSlot, overheadExpiryTick, movementStartCycle, stalledTicks;
     public int orientation, targetOrientation;
     public int arrivalTick = Integer.MAX_VALUE, nextWanderTick, nextChatTick;
-    public boolean arrived;
+    public int nextFollowTick;
+    public boolean arrived, stopTargetChosen;
     public WorldPoint idleTarget, followTarget;
     public FanState state = FanState.DESPAWNED;
     public FanAppearance appearance;
@@ -51,6 +52,8 @@ public final class FanEntity {
         idleTarget = null;
         followTarget = null;
         nextChatTick = 0;
+        nextFollowTick = 0;
+        stopTargetChosen = false;
     }
 
     public LocalPoint getRenderLocation() {

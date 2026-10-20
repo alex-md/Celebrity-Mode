@@ -60,6 +60,9 @@ public class CelebrityModePlugin extends Plugin {
 
     @Override
     protected void startUp() {
+        String oldFormation = configManager.getConfiguration(CelebrityModeConfig.GROUP, "formationStyle");
+        if ("ENTOURAGE".equals(oldFormation) || "SWARM".equals(oldFormation))
+            configManager.setConfiguration(CelebrityModeConfig.GROUP, "formationStyle", "LOOSE_CROWD");
         enabled = true;
         fanPmEngine.startUp();
         overlayManager.add(overlay);

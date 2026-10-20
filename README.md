@@ -31,7 +31,9 @@ Crowd controls save as you change them. The regular RuneLite settings remain ava
 
 ## A crowd that settles and changes
 
-Followers choose a stable destination when you stop and finish catching up continuously. After about 15–60 seconds idle, roughly 30% of the crowd gradually picks a nearby viewing spot. Most remain in the following formation. Settled fans usually hold their tile; occasional adjustments are short and spaced well apart. Moving again brings everyone back into following behavior.
+Choose **Loose Crowd** for a clustered pack with some fans clicking alongside it, or **Trail** for a narrower breadcrumb-following train. Fans notice departures over several ticks, keep clicks briefly, and run to catch up at individual distances. Personal space prefers adjacent open tiles without leaving an empty ring; fans can still share tiles. Travelling spread caps the width of the fans alongside the pack, while its core stays close.
+
+When you stop, followers independently choose a stable destination near you and finish catching up. After about 15–45 seconds idle, some fans gradually gather in small groups near you while others keep watching from their spot. Group members take short, one- or two-tile walks between pauses, and turn toward nearby friends. Quiet fans and screenshotters pause longer. Roughly a tenth of the crowd can wander at once (at least one fan for small crowds), with at most one new walk starting per game tick. Moving again brings everyone back into following behavior.
 
 Your chosen crowd size is a maximum. After an initial settling period of about six minutes, attendance can drift down and back up within a small band of roughly 8% below that limit, with at least one fan remaining. Nearby real-player activity, your local time of day, and random variation influence attendance. Changes happen one fan at a time, usually tens of seconds apart; new fans use your selected arrival pace. Nearby activity is a local estimate, not a count of everyone logged into the world.
 
@@ -115,9 +117,9 @@ The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a su
 | Crowd size / Fan limit | 8 | Set a maximum of 1–100 fans; attendance varies slightly and new fans use your arrival pace |
 | Show crowd | On | Hide or show the fans without losing settings |
 | Arrival pace | Gradual | Gradual, Quick, or Instant; applies to new arrivals |
-| Formation | Entourage | Travel as an Entourage, Trail, Loose Crowd, or Swarm; most keep following; some gradually gather after a longer pause |
-| Personal space | On | Prefer separate tiles; larger crowds have more room to choose a viewing spot |
-| Maximum spread | 2 | Set travelling spread from 1–8 tiles |
+| Formation | Loose Crowd | Choose Loose Crowd or the narrower Trail; fans gradually form small groups when you stop |
+| Personal space | On | Prefer nearby open tiles without an empty ring around you; fans can share tiles |
+| Maximum spread | 2 | Limit travelling width from 1–8 tiles while keeping a close core |
 | Gear theme | Mixed | Choose Bob, bronze, F2P, midgame, fashionscape, modern gear, or mixed outfits |
 | Show fan names | Off | Show simulated usernames above fans |
 | Chat frequency | Spam | Off, Low, Normal, or Spam |
@@ -130,6 +132,14 @@ The sidebar keeps crowd setup, dialogue, and appearance in three tabs, with a su
 | Debug overlay | Off | Show movement diagnostics for development |
 
 **Chat frequency: Off** disables all overhead dialogue, including event reactions. **React to events** controls event reactions and emotes; activity-aware built-in chatter follows **Quote source** and **Chat frequency**. In `CUSTOM_ONLY` mode, event dialogue also comes from your custom pool. Names are controlled separately.
+
+## Recent changes
+
+- Simplified formations to Loose Crowd and Trail. Saved Entourage and Swarm selections become Loose Crowd.
+- Replaced the personal-space exclusion ring with a preference for nearby open tiles and natural sharing.
+- Added short idle walks, small groups of companions, varied pauses, and a limit on simultaneous wanderers.
+- Moved overhead text to a later draw layer to prevent the local player covering fan messages.
+- Corrected equipment coverage so open hats retain hair and beards, while helmets and masks hide only the body parts specified by the item.
 
 ## Installation
 

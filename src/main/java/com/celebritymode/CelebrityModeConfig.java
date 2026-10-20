@@ -93,13 +93,13 @@ public interface CelebrityModeConfig extends Config {
             section = crowd,
             position = 1)
     default FormationStyle formationStyle() {
-        return FormationStyle.ENTOURAGE;
+        return FormationStyle.LOOSE_CROWD;
     }
 
     @ConfigItem(
             keyName = "respectPersonalSpace",
             name = "Personal space",
-            description = "Prefer distinct tiles; avoid your tile while gathering close",
+            description = "Prefer nearby open tiles without leaving an empty ring around you",
             section = crowd,
             position = 2)
     default boolean respectPersonalSpace() {
@@ -110,7 +110,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "maxSpread",
             name = "Maximum spread",
-            description = "Lateral spread in tiles",
+            description = "Maximum width for fans clicking alongside the following crowd",
             section = crowd,
             position = 3)
     default int maxSpread() {

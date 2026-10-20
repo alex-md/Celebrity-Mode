@@ -90,7 +90,8 @@ public final class FanMovementController {
             return;
         }
         fan.stalledTicks = 0;
-        boolean run = !stoppedCrowd && (playerRunning || fan.position.distanceTo(target) >= 4);
+        int runThreshold = 3 + Math.floorMod(fan.id * 13, 3);
+        boolean run = !stoppedCrowd && fan.position.distanceTo(target) >= runThreshold;
         int steps = Math.min(run ? 2 : 1, route.size());
         LocalPoint[] path = new LocalPoint[steps + 1];
         path[0] = fan.renderLocation;

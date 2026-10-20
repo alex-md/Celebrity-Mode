@@ -1,6 +1,7 @@
 package com.celebritymode.appearance;
 
 import net.runelite.api.*;
+import net.runelite.api.kit.KitType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,10 @@ import javax.inject.*;
 public final class FanModelFactory {
     private static final Logger log = LoggerFactory.getLogger(FanModelFactory.class);
     private static final short[] BODY_COLORS = {6798, 8741, 25238, 4626, 4550};
+    private static final KitType[] BODY_SLOTS = {
+        KitType.HAIR, KitType.JAW, KitType.TORSO, KitType.ARMS,
+        KitType.HANDS, KitType.LEGS, KitType.BOOTS
+    };
     private final Client client;
     private final Map<Integer, Definition> kits = new LinkedHashMap<>(), items = new HashMap<>();
 
@@ -76,23 +81,13 @@ public final class FanModelFactory {
                     items.put(id, item);
                 }
                 equipment.add(mesh(item));
-                // Cache wear-position tags identify covered body kits, including arms/beards.
-                int[] partSlots = {11, 8, 4, 6, 9, 7, 10};
-                for (int part = 0; part < partSlots.length; part++)
-                    if (item.slot == partSlots[part]
-                            || item.wear2 == partSlots[part]
-                            || item.wear3 == partSlots[part]) hidden[part] = true;
-                // A head item replaces the hair/head kit; beard coverage follows cache tags.
-                if (item.slot == 0) {
-                    hidden[0] = true;
+                // Only explicit coverage tags replace body kits. The head equipment slot
+                // itself does not cover hair or jaw: open hats still need those meshes.
+                for (int part = 0; part < BODY_SLOTS.length; part++) {
+                    int slot = BODY_SLOTS[part].getIndex();
+                    if (item.slot == slot || item.wear2 == slot || item.wear3 == slot)
+                        hidden[part] = true;
                 }
-                if (item.slot == 4) {
-                    hidden[2] = true;
-                    if (item.wear2 == 6) hidden[3] = true;
-                }
-                if (item.slot == 7) hidden[5] = true;
-                if (item.slot == 9) hidden[4] = true;
-                if (item.slot == 10) hidden[6] = true;
             }
         List<ModelData> body = new ArrayList<>();
         for (int part = 0; part < 7; part++)

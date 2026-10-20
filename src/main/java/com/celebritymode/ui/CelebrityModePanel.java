@@ -110,9 +110,9 @@ public final class CelebrityModePanel extends PluginPanel {
         finish(page, crowd);
 
         JPanel presets = section("Choose your crowd", "Presets change fans, formation, and chatter.");
-        preset(presets, "Small audience", "8 fans · Entourage · Low chatter", 8, FormationStyle.ENTOURAGE, ChatFrequency.LOW);
+        preset(presets, "Small audience", "8 fans · Loose crowd · Low chatter", 8, FormationStyle.LOOSE_CROWD, ChatFrequency.LOW);
         preset(presets, "Fan club", "24 fans · Loose crowd · Normal chatter", 24, FormationStyle.LOOSE_CROWD, ChatFrequency.NORMAL);
-        preset(presets, "Big entrance", "60 fans · Swarm · Spam chatter", 60, FormationStyle.SWARM, ChatFrequency.SPAM);
+        preset(presets, "Big entrance", "60 fans · Loose crowd · Spam chatter", 60, FormationStyle.LOOSE_CROWD, ChatFrequency.SPAM);
         finish(page, presets);
         return page;
     }
@@ -203,7 +203,7 @@ public final class CelebrityModePanel extends PluginPanel {
         combo(appearance, "Gear theme", "crowdGearTier", FanGearTier.values(), config::crowdGearTier);
         toggle(appearance, "Fan names", "Show simulated usernames above followers.", "showFanNames", config::showFanNames);
         number(appearance, "Travelling spread", "maxSpread", 1, 8, config::maxSpread, "tiles");
-        toggle(appearance, "Personal space", "Prefer separate tiles. Large crowds may share.", "respectPersonalSpace", config::respectPersonalSpace);
+        toggle(appearance, "Personal space", "Prefer open tiles nearby. Fans can still cluster and share tiles.", "respectPersonalSpace", config::respectPersonalSpace);
         finish(page, appearance);
         JPanel reactions = section("Reactions", "A little extra life in the crowd.");
         toggle(reactions, "Event reactions", "Recognition, levels, deaths, and occasional idle waves or cheers.", "reactToEvents", config::reactToEvents);
