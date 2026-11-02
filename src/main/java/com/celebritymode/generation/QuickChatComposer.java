@@ -108,10 +108,29 @@ public final class QuickChatComposer {
         "{place} says {hello}", "{certainty} forgot what i logged in for"
     };
 
+    // These structures describe noticing somebody for the first time, rather than ongoing company.
+    private static final Set<String> ARRIVAL_ONLY = new HashSet<>(Arrays.asList(
+        "{shock}", "{shock} {hello}", "{player}??", "{shock} it's {player}", "it's {player}",
+        "is that {player}?", "you're {real}?", "{address} you're {real}", "is this {certainty} you?",
+        "{shock} you're here", "{player} is {real}", "{place} needs proof", "telling {place}",
+        "{praise} timing", "{player} spotted", "{shock} same world", "{shock} not a lookalike",
+        "{place} won't believe i found you", "{shock} i wasn't expecting to see {player}",
+        "{certainty} thought you were a lookalike", "{address} i logged in at the right time",
+        "{shock}, {place} said you were here", "is this {certainty} you?", "you're {real}?",
+        "real {player}?", "not a lookalike?", "{player} or a fake?", "{address} prove it",
+        "wait the real one?", "{certainty} your account?", "{shock} is it you",
+        "{shock} {player}", "{address} no way", "{shock} i'm here"
+    ));
+
     private QuickChatComposer() {}
 
     public static FanUtterance generate(Random random, String tone, String player,
             String category, String gear, String target, String skill, boolean compact) {
+        return generate(random, tone, player, category, gear, target, skill, compact, true);
+    }
+
+    public static FanUtterance generate(Random random, String tone, String player,
+            String category, String gear, String target, String skill, boolean compact, boolean newcomer) {
         List<String> situational = new ArrayList<>();
         switch (category) {
             case "low_health":
@@ -177,6 +196,11 @@ public final class QuickChatComposer {
                 : roll < 85 ? personality : Arrays.asList(SHORT);
         // A substantial shared pool keeps personalities from becoming a small repeated script.
         if (compact && random.nextInt(3) == 0) pool = Arrays.asList(SHORT);
+        if (!newcomer) {
+            pool = new ArrayList<>(pool);
+            pool.removeIf(ARRIVAL_ONLY::contains);
+            if (pool.isEmpty()) pool = Arrays.asList("gl on {goal}", "{content} later?", "{praise} setup");
+        }
         String pattern = pool.get(random.nextInt(pool.size()));
         Map<String, String> slots = new LinkedHashMap<>();
         slots.put("player", player.isEmpty() ? "you" : player);

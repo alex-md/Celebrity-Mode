@@ -26,6 +26,7 @@ public final class FanChatManager {
     private int conversationTurn, replyTick, replyDeadline, nextConversationTick;
     private final Map<FanEntity, Integer> speakingTicks = new IdentityHashMap<>();
     private final Map<FanEntity, PendingReaction> reactions = new IdentityHashMap<>();
+    private int currentTick;
     private int warmupTick = Integer.MAX_VALUE;
 
     private static final class PendingReaction {
@@ -68,14 +69,15 @@ public final class FanChatManager {
     }
 
     public void tick(List<FanEntity> fans, int tick) {
+        currentTick = tick;
         recentFans.keySet().retainAll(fans);
         fanStructures.keySet().retainAll(fans);
         visibleStructures.keySet().retainAll(fans);
         conversationPartners.entrySet().removeIf(entry -> !fans.contains(entry.getKey())
                 || !fans.contains(entry.getValue()) || tick >= entry.getKey().overheadExpiryTick);
         for (FanEntity fan : fans) if (tick >= fan.overheadExpiryTick) fan.overheadText = null;
-        speakingTicks.keySet().removeIf(fan -> !fans.contains(fan) || !fan.isVisible());
-        reactions.keySet().removeIf(fan -> !fans.contains(fan) || !fan.isVisible());
+        speakingTicks.keySet().removeIf(fan -> !fans.contains(fan) || !fan.isVisible() || fan.departing);
+        reactions.keySet().removeIf(fan -> !fans.contains(fan) || !fan.isVisible() || fan.departing);
         if (frequency == ChatFrequency.OFF) return;
         advanceReactions(tick, fans.size());
         advanceConversation(fans, tick);
@@ -85,7 +87,7 @@ public final class FanChatManager {
         for (FanEntity fan : fans) if (fan.isVisible()) visible++;
         final int crowdSize = visible;
         for (FanEntity fan : fans) {
-            if (!fan.isVisible()) continue;
+            if (!fan.isVisible() || fan.departing) continue;
             int due = speakingTicks.computeIfAbsent(fan,
                     ignored -> tick + initialDelay(crowdSize));
             if (fan != firstSpeaker && fan != secondSpeaker && fan != thirdSpeaker && !reactions.containsKey(fan)
@@ -99,7 +101,7 @@ public final class FanChatManager {
             FanEntity first = eligible.get(0);
             FanEntity second = null;
             for (FanEntity candidate : fans) {
-                if (candidate == first || !candidate.isVisible() || reactions.containsKey(candidate)
+                if (candidate == first || !candidate.isVisible() || candidate.departing || reactions.containsKey(candidate)
                         || candidate.nextChatTick > tick + 30) continue;
                 if (first.position != null && candidate.position != null
                         && first.position.distanceTo(candidate.position) <= 6) {
@@ -117,7 +119,7 @@ public final class FanChatManager {
                         List<FanEntity> bystanders = new ArrayList<>(fans);
                         Collections.shuffle(bystanders, random);
                         for (FanEntity candidate : bystanders) {
-                            if (candidate != first && candidate != second && candidate.isVisible()
+                            if (candidate != first && candidate != second && candidate.isVisible() && !candidate.departing
                                     && !reactions.containsKey(candidate) && candidate.position != null
                                     && candidate.nextChatTick <= tick + 30
                                     && candidate.position.distanceTo(first.position) <= 6
@@ -183,9 +185,10 @@ public final class FanChatManager {
         if (conversation == null) return;
         if (!fans.contains(firstSpeaker) || !fans.contains(secondSpeaker)
                 || !firstSpeaker.isVisible() || !secondSpeaker.isVisible()
+                || firstSpeaker.departing || secondSpeaker.departing
                 || firstSpeaker.position == null || secondSpeaker.position == null
                 || firstSpeaker.position.distanceTo(secondSpeaker.position) > 6
-                || (thirdSpeaker != null && (!fans.contains(thirdSpeaker) || !thirdSpeaker.isVisible()
+                || (thirdSpeaker != null && (!fans.contains(thirdSpeaker) || !thirdSpeaker.isVisible() || thirdSpeaker.departing
                         || thirdSpeaker.position == null
                         || thirdSpeaker.position.distanceTo(firstSpeaker.position) > 6
                         || thirdSpeaker.position.distanceTo(secondSpeaker.position) > 6))
@@ -219,7 +222,7 @@ public final class FanChatManager {
         firstSpeaker = secondSpeaker = thirdSpeaker = null;
     }
 
-    /** Only stationary speakers turn; walking and running retain path orientation. */
+    /** Social association only; speaking never overrides movement-driven facing. */
     public FanEntity conversationPartner(FanEntity fan, int tick) {
         if (tick >= fan.overheadExpiryTick) return null;
         FanEntity partner = conversationPartners.get(fan);
@@ -292,7 +295,8 @@ public final class FanChatManager {
         int lengthRoll = random.nextInt(100);
         // Evaluate a bounded set of candidates, preferring new wording AND new structure.
         for (int attempt = 0; attempt < 48; attempt++) {
-            FanUtterance candidate = FanDialogueGenerator.generateUtterance(random, fan.personality, context, lengthRoll);
+            FanUtterance candidate = FanDialogueGenerator.generateUtterance(random, fan.personality, context, lengthRoll,
+                    !fan.recognized && (fan.joinedTick < 0 || currentTick - fan.joinedTick <= 30));
             String key = signature(candidate.text);
             int penalty = recentCrowd.contains(key) ? 8 : 0;
             if (recentFans.get(fan) != null && recentFans.get(fan).contains(key)) penalty += 12;
@@ -328,7 +332,10 @@ public final class FanChatManager {
     }
 
     public void reactEvent(List<FanEntity> fans, int tick, String event) {
-        reactGenerated(fans, tick, () -> FanDialogueGenerator.event(event, context, random));
+        List<FanEntity> eligible = new ArrayList<>();
+        for (FanEntity fan : fans)
+            if (!fan.departing && (!event.equals("recognition") || !fan.recognized)) eligible.add(fan);
+        reactGenerated(eligible, tick, () -> FanDialogueGenerator.event(event, context, random));
     }
 
     public void react(List<FanEntity> fans, int tick, String[] quotes) {
@@ -343,7 +350,7 @@ public final class FanChatManager {
         int start = random.nextInt(fans.size());
         for (int i = 0; i < Math.min(2, fans.size()); i++) {
             FanEntity fan = fans.get((start + i) % fans.size());
-            if (fan.isVisible()) {
+            if (fan.isVisible() && !fan.departing) {
                 String text = mode == CustomQuoteMode.CUSTOM_ONLY ? choose(custom) : generate.get();
                 if (i == 0) {
                     reactions.remove(fan);
@@ -368,6 +375,7 @@ public final class FanChatManager {
             visibleStructures.put(fan, utterance.structure);
         } else visibleStructures.remove(fan);
         if (quote != null) {
+            fan.recognized = true;
             String key = signature(quote);
             remember(recentCrowd, key, 96);
             Deque<String> personal = recentFans.computeIfAbsent(fan, ignored -> new ArrayDeque<>());

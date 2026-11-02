@@ -134,15 +134,7 @@ public final class TestScene {
                             }
                             return null;
                         });
-        Animation animation =
-                proxy(
-                        Animation.class,
-                        (m, a) -> {
-                            if (m.equals("getFrameLengths")) return new int[] {100, 100};
-                            if (m.equals("getDuration")) return 2;
-                            if (m.equals("getFrameStep")) return 2;
-                            return null;
-                        });
+        Map<Integer, Animation> animationResources = new HashMap<>();
         Client[] handle = new Client[1];
         handle[0] =
                 proxy(
@@ -182,7 +174,14 @@ public final class TestScene {
                                     return mesh[0];
                                 case "loadAnimation":
                                     loadedAnimations.add((int) a[0]);
-                                    return animation;
+                                    return animationResources.computeIfAbsent((int) a[0], id -> proxy(
+                                            Animation.class, (method, args) -> {
+                                                if (method.equals("getId")) return id;
+                                                if (method.equals("getFrameLengths")) return new int[] {100, 100};
+                                                if (method.equals("getDuration")) return 2;
+                                                if (method.equals("getFrameStep")) return 2;
+                                                return null;
+                                            }));
                                 case "createRuneLiteObject":
                                     return new RuneLiteObject(handle[0]);
                                 case "registerRuneLiteObject":
@@ -217,10 +216,22 @@ public final class TestScene {
                         animations);
     }
 
+    // Movement/scene regression tests can hold identities; lifecycle tests leave real visit timers enabled.
+    public boolean holdVisitors;
+
     public void tick() {
-        cycle += 30;
-        for (RuneLiteObjectController object : new ArrayList<>(active)) object.tick(30);
+        if (holdVisitors) for (com.celebritymode.fan.FanEntity fan : manager.getFans())
+            fan.leaveTick = Integer.MAX_VALUE;
+        clientCycles(30);
         manager.onGameTick(player);
+    }
+
+    public void clientCycles(int count) {
+        for (int i = 0; i < count; i++) {
+            cycle++;
+            for (RuneLiteObjectController object : new ArrayList<>(active)) object.tick(1);
+            manager.onClientTick();
+        }
     }
 
     public void populate() {

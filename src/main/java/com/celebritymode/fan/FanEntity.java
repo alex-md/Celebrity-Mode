@@ -13,9 +13,14 @@ public final class FanEntity {
     public final int trailOffset, lateralBias, tileJitterX, tileJitterY;
     public int formationSlot, overheadExpiryTick, movementStartCycle, stalledTicks;
     public int orientation, targetOrientation;
+    public int lastRenderCycle = -1, animationId = -1;
     public int arrivalTick = Integer.MAX_VALUE, nextWanderTick, nextChatTick;
-    public int nextFollowTick;
-    public boolean arrived, stopTargetChosen;
+    public int nextFollowTick, stopDecisionTick;
+    public int nextMovementCycle, movementDurationCycles = 30;
+    public boolean socialMovement;
+    public boolean arrived, stopTargetChosen, recognized, departing, catchingUp;
+    public int joinedTick = -1, leaveTick = Integer.MAX_VALUE, departureDeadline;
+    public WorldPoint departureTarget;
     public WorldPoint idleTarget, followTarget;
     public FanState state = FanState.DESPAWNED;
     public FanAppearance appearance;
@@ -42,6 +47,8 @@ public final class FanEntity {
         if (object != null) object.setActive(false);
         object = null;
         animation = null;
+        animationId = -1;
+        lastRenderCycle = -1;
         renderLocation = null;
         movementPath = null;
         position = null;
@@ -53,7 +60,11 @@ public final class FanEntity {
         followTarget = null;
         nextChatTick = 0;
         nextFollowTick = 0;
+        stopDecisionTick = 0;
         stopTargetChosen = false;
+        catchingUp = false;
+        nextMovementCycle = 0;
+        socialMovement = false;
     }
 
     public LocalPoint getRenderLocation() {

@@ -39,26 +39,15 @@ public final class FanAppearanceFactory {
         List<EquipmentCatalog.Item> chosen = new ArrayList<>();
         EquipmentCatalog.Item body = catalog.choose(4, tier, null, random);
         if (body != null) chosen.add(body);
-        String affinity = body == null ? null : body.family;
-        for (int slot : new int[] {0, 7, 10, 9, 1, 2, 3}) {
-            if ((slot == 2 || slot == 0) && random.nextInt(5) == 0) continue;
-            EquipmentCatalog.Item item =
-                    catalog.choose(
-                            slot,
-                            tier,
-                            tier == FanGearTier.RANDOM_FASHIONSCAPE
-                                            || slot == 3
-                                            || slot == 1
-                                            || slot == 2
-                                    ? null
-                                    : affinity,
-                            random);
+        EquipmentCatalog.Item weapon = catalog.chooseCompatible(3, tier, body, null, random);
+        if (weapon != null) chosen.add(weapon);
+        for (int slot : new int[] {0, 7, 10, 9, 1, 2}) {
+            if ((slot == 2 || slot == 0 || slot == 1) && random.nextInt(5) == 0) continue;
+            EquipmentCatalog.Item item = catalog.chooseCompatible(slot, tier, body, weapon, random);
             if (item != null) chosen.add(item);
         }
-        EquipmentCatalog.Item weapon = null;
-        for (EquipmentCatalog.Item item : chosen) if (item.slot == 3) weapon = item;
         if (weapon == null || !weapon.twoHanded) {
-            EquipmentCatalog.Item shield = catalog.choose(5, tier, null, random);
+            EquipmentCatalog.Item shield = catalog.chooseCompatible(5, tier, body, weapon, random);
             if (shield != null) chosen.add(shield);
         }
         int[] equipment = chosen.stream().mapToInt(item -> item.id).toArray();

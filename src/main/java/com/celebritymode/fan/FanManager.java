@@ -50,8 +50,8 @@ public final class FanManager {
             retryAfter,
             lastRecognition = -1000;
     private int lastEventReaction = -1000;
-    private int nextCrowdEmoteTick;
-    private boolean recognitionPending, sceneSuspended, instanced;
+    private int nextCrowdEmoteTick, nextReplacementTick;
+    private boolean recognitionPending, sceneSuspended, instanced, playerRunning;
     private int instanceLayout;
 
     @Inject
@@ -150,7 +150,8 @@ public final class FanManager {
             if (stationaryTicks > 0) {
                 trail.beginTravelLeg();
                 for (FanEntity fan : fans) {
-                    fan.nextFollowTick = tick + Math.floorMod(fan.id * 37 + fan.trailOffset, 5);
+                    fan.nextFollowTick = tick + random.nextInt(5);
+                    fan.nextMovementCycle = client.getGameCycle() + random.nextInt(25);
                     // Wait in place while noticing the player leaving, never backtrack
                     // toward a stale destination from the preceding travel leg.
                     fan.followTarget = fan.position;
@@ -169,7 +170,14 @@ public final class FanManager {
                 fan.idleTarget = null;
                 fan.stopTargetChosen = false;
             }
-        } else stationaryTicks++;
+        } else {
+            stationaryTicks++;
+            if (stationaryTicks == 1)
+                for (FanEntity fan : fans)
+                    fan.stopDecisionTick = tick + 2 + random.nextInt(9)
+                            + (fan.personality == FanPersonality.QUIET ? 3 : 0);
+        }
+        playerRunning = running;
         trail.update(point);
         previous = point;
         String equipped = "";
@@ -181,51 +189,50 @@ public final class FanManager {
         chat.setContext(
                 activity.observe(client, player, equipped, stationaryTicks == 0, running, tick));
         appearances.advanceCatalog();
-        resizeCrowd(
+        adjustAttendance(
                 population.update(
                         tick, config.crowdSize(), nearbyPlayers(current),
-                        LocalTime.now().getHour(), random));
+                        LocalTime.now().getHour(), random), point);
         if (changed)
             for (int i = 0; i < fans.size(); i++) {
                 FanEntity fan = fans.get(i);
                 fan.arrived = false;
                 fan.arrivalTick = config.arrivalPace().dueTick(tick, i);
             }
+        updateVisits(point);
         boolean stopped = stationaryTicks >= 25;
         Set<WorldPoint> reserved = new HashSet<>();
         for (FanEntity fan : fans) if (fan.position != null) reserved.add(fan.position);
-        int idleWalkers = 0;
-        for (FanEntity fan : fans)
-            if (fan.idleTarget != null && fan.position != null
-                    && (fan.movementPath != null || !fan.position.equals(fan.idleTarget))) idleWalkers++;
-        int idleWalkLimit = Math.max(1, (fans.size() + 9) / 10);
-        boolean idleWalkStarted = false;
         for (FanEntity fan : fans) {
             if (!fan.arrived && tick < fan.arrivalTick) continue;
             if (fan.position != null) reserved.remove(fan.position);
+            if (fan.departing) {
+                if (fan.isVisible() && fan.departureTarget != null) {
+                    movement.plan(fan, fan.departureTarget, trail, false, view, client.getGameCycle(), true);
+                }
+                continue;
+            }
             boolean gathering = formations.shouldGather(fan, stationaryTicks);
             WorldPoint target;
             if (fan.state == FanState.REACTION && stationaryTicks > 0) {
                 target = fan.position;
             } else if (gathering && fan.position != null) {
-                boolean alreadyWalking = fan.idleTarget != null
-                        && (fan.movementPath != null || !fan.position.equals(fan.idleTarget));
-                target = formations.chooseIdleTarget(fan, point, reserved, random, tick,
-                        idleWalkers < idleWalkLimit && !idleWalkStarted);
-                if (!alreadyWalking && target != null && !target.equals(fan.position)) {
-                    idleWalkers++;
-                    idleWalkStarted = true;
-                }
+                target = formations.chooseIdleTarget(fan, point, reserved, random, tick);
             } else if (fan.followTarget == null && fan.position != null && tick < fan.nextFollowTick) {
                 target = fan.position;
             } else if (fan.followTarget != null
                     && collision.canOccupy(fan.followTarget)
-                    && (tick < fan.nextFollowTick || (stationaryTicks > 0 && fan.stopTargetChosen))) {
+                    && ((tick < fan.nextFollowTick
+                            && !(stationaryTicks == 0 && fan.position != null
+                                    && fan.position.distanceTo(fan.followTarget) <= 1))
+                        || (stationaryTicks > 0
+                            && (fan.stopTargetChosen || tick < fan.stopDecisionTick)))
+                    && (stationaryTicks == 0 || formations.validFollowingStop(fan, point))) {
                 target = fan.followTarget;
             } else {
                 target = formations.chooseTarget(
                         fan, point, dx, dy, trail, reserved, stationaryTicks);
-                fan.nextFollowTick = tick + 1 + Math.floorMod(fan.id * 17 + fan.trailOffset, 3);
+                fan.nextFollowTick = tick + 1 + random.nextInt(4);
                 if (stationaryTicks > 0) fan.stopTargetChosen = true;
             }
             if (!gathering && fan.state != FanState.REACTION) fan.followTarget = target;
@@ -234,9 +241,7 @@ public final class FanManager {
                     || !fan.object.isActive()
                     || fan.position == null
                     || LocalPoint.fromWorld(view, fan.position) == null
-                    || fan.position.distanceTo(point) > 45
-                    || fan.stalledTicks > 20
-                    || (target != null && fan.position.distanceTo(target) > 24)) {
+                    || fan.position.distanceTo(point) > 45) {
                 if (tick < retryAfter) continue;
                 try {
                     WorldPoint spawnPoint =
@@ -252,23 +257,16 @@ public final class FanManager {
                 }
                 continue;
             }
-            movement.render(fan, view, client.getGameCycle());
-            movement.plan(fan, target, trail, running, view, client.getGameCycle(), gathering);
-            if (fan.state == FanState.IDLE || fan.state == FanState.REACTION) {
-                FanEntity partner = chat.conversationPartner(fan, tick);
-                if (partner == null && gathering) partner = idleCompanion(fan);
-                WorldPoint facing = partner == null ? point : partner.position;
-                if (facing != null && (partner != null || fan.id % 5 != 0))
-                    fan.targetOrientation =
-                            OrientationUtil.facing(
-                                    facing.getX() - fan.position.getX(),
-                                    facing.getY() - fan.position.getY());
-            }
+            if (fan.movementPath == null && target != null && !target.equals(fan.target)
+                    && fan.position.equals(fan.target))
+                fan.nextMovementCycle = client.getGameCycle() + random.nextInt(25);
+            movement.plan(fan, target, trail, running, view, client.getGameCycle(),
+                    gathering);
         }
         if (stopped && config.reactToEvents() && tick >= nextCrowdEmoteTick) {
             List<FanEntity> idle = new ArrayList<>();
             for (FanEntity fan : fans)
-                if (fan.isVisible()
+                if (fan.isVisible() && !fan.departing
                         && fan.state == FanState.IDLE
                         && fan.movementPath == null
                         && fan.personality != FanPersonality.QUIET) idle.add(fan);
@@ -286,22 +284,6 @@ public final class FanManager {
             }
             recognitionPending = false;
         }
-    }
-
-    /** Face a nearby member of the same little group between walks. */
-    private FanEntity idleCompanion(FanEntity fan) {
-        FanEntity closest = null;
-        int distance = 4;
-        for (FanEntity other : fans) {
-            if (other == fan || other.id / 4 != fan.id / 4 || other.idleTarget == null
-                    || other.position == null || !other.isVisible() || other.state != FanState.IDLE) continue;
-            int separation = fan.position.distanceTo(other.position);
-            if (separation > 0 && separation < distance) {
-                closest = other;
-                distance = separation;
-            }
-        }
-        return closest;
     }
 
     private int nearbyPlayers(WorldView current) {
@@ -326,16 +308,32 @@ public final class FanManager {
         fan.renderLocation = local.plus(fan.tileJitterX, fan.tileJitterY);
         fan.position = point;
         fan.target = point;
-        fan.orientation =
-                fan.targetOrientation =
-                        OrientationUtil.facing(
-                                previous == null ? 0 : previous.getX() - point.getX(),
-                                previous == null ? 1 : previous.getY() - point.getY());
+        if (fan.joinedTick < 0)
+            fan.orientation = OrientationUtil.facing(
+                    previous == null ? 0 : Integer.signum(previous.getX() - point.getX()),
+                    previous == null ? 1 : Integer.signum(previous.getY() - point.getY()));
+        fan.targetOrientation = fan.orientation;
         fan.object.setLocation(fan.renderLocation, plane);
         fan.object.setOrientation(fan.orientation);
         animations.setState(fan, FanState.IDLE);
         fan.nextWanderTick = tick + 15 + random.nextInt(45);
+        // Small persistent pace differences prevent a crowd-wide step phase.
+        if (fan.joinedTick < 0) fan.movementDurationCycles = 28 + random.nextInt(3);
         fan.object.setActive(true);
+        fan.lastRenderCycle = client.getGameCycle();
+        if (fan.joinedTick < 0) {
+            fan.joinedTick = tick;
+            double mean;
+            switch (fan.personality) {
+                case SCREENSHOTTER: mean = 100; break;
+                case BEGGAR: mean = 140; break;
+                case MEMER: mean = 200; break;
+                case EXCITED: mean = 260; break;
+                case HYPEMAN: mean = 400; break;
+                default: mean = 350; break;
+            }
+            fan.leaveTick = tick + 100 + (int) Math.min(800, -Math.log1p(-random.nextDouble()) * mean);
+        }
     }
 
     public void onClientTick() {
@@ -369,14 +367,26 @@ public final class FanManager {
         }
         if (sceneSuspended) return;
         for (FanEntity fan : fans)
-            if (fan.isVisible()) movement.render(fan, view, client.getGameCycle());
+            if (fan.isVisible()) movement.advance(
+                    fan, trail, playerRunning, view, client.getGameCycle());
+    }
+
+    private void adjustAttendance(int desired, WorldPoint player) {
+        List<FanEntity> attending = new ArrayList<>();
+        for (FanEntity fan : fans) if (!fan.departing) attending.add(fan);
+        if (attending.size() > desired) {
+            FanEntity fan = attending.get(random.nextInt(attending.size()));
+            if (fan.position != null) beginDeparture(fan, player);
+        }
+        // Attendance reductions walk out; an explicit user resize still applies the new cap immediately.
+        resizeCrowd(Math.max(fans.size(), desired));
     }
 
     public void resizeCrowd(int size) {
         int desired = Math.max(1, Math.min(CrowdArrival.MAX_FANS, size));
         while (fans.size() > desired) fans.remove(random.nextInt(fans.size())).deactivate();
         int arrivalOrdinal = 0;
-        while (fans.size() < desired) {
+        while (fans.size() < desired && tick >= nextReplacementTick) {
             int id = nextId++;
             Set<String> excluded = new HashSet<>();
             for (FanEntity existing : fans) excluded.add(existing.displayName);
@@ -391,6 +401,35 @@ public final class FanManager {
                             1 + random.nextInt(10),
                             random.nextInt(3) - 1));
             fans.get(fans.size() - 1).arrivalTick = config.arrivalPace().dueTick(tick, arrivalOrdinal++);
+            if (nextReplacementTick > 0) nextReplacementTick = tick + 8 + random.nextInt(33);
+        }
+        formations.reassignSlots(fans);
+    }
+
+    private void beginDeparture(FanEntity fan, WorldPoint player) {
+        fan.departing = true;
+        fan.departureTarget = formations.chooseDeparturePoint(fan, player);
+        fan.departureDeadline = tick + 45;
+        fan.overheadText = null;
+        fan.idleTarget = null;
+    }
+
+    private void updateVisits(WorldPoint player) {
+        int departing = (int) fans.stream().filter(f -> f.departing).count();
+        int limit = Math.max(1, (fans.size() + 9) / 10);
+        for (Iterator<FanEntity> iterator = fans.iterator(); iterator.hasNext();) {
+            FanEntity fan = iterator.next();
+            if (!fan.departing && fan.isVisible() && tick >= fan.leaveTick && departing < limit) {
+                beginDeparture(fan, player);
+                departing++;
+            }
+            if (fan.departing && (fan.position == null || tick >= fan.departureDeadline
+                    || (fan.departureTarget != null && fan.departureTarget.equals(fan.position)
+                            && fan.movementPath == null))) {
+                fan.deactivate();
+                iterator.remove();
+                nextReplacementTick = Math.max(nextReplacementTick, tick + 8 + random.nextInt(33));
+            }
         }
         formations.reassignSlots(fans);
     }
@@ -411,6 +450,7 @@ public final class FanManager {
                 break;
             case "crowdSize":
                 population.clear();
+                nextReplacementTick = 0;
                 resizeCrowd(config.crowdSize());
                 break;
             case "crowdGearTier":
@@ -495,6 +535,7 @@ public final class FanManager {
                 fan.renderLocation = local.plus(fan.tileJitterX, fan.tileJitterY);
                 fan.object.setLocation(fan.renderLocation, plane);
                 fan.object.setActive(true);
+                fan.lastRenderCycle = client.getGameCycle();
                 animations.setState(fan, FanState.IDLE);
             }
         sceneSuspended = false;
@@ -504,6 +545,8 @@ public final class FanManager {
         for (FanEntity fan : fans) {
             fan.deactivate();
             fan.arrived = false;
+            fan.departing = false;
+            fan.departureTarget = null;
             fan.arrivalTick = Integer.MAX_VALUE;
         }
         trail.clear();
@@ -527,6 +570,7 @@ public final class FanManager {
         population.clear();
         nextId = 0;
         tick = 0;
+        nextReplacementTick = 0;
         lastRecognition = -1000;
         lastEventReaction = -1000;
     }

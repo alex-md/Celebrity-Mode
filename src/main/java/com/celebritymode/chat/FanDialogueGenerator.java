@@ -24,6 +24,13 @@ public final class FanDialogueGenerator {
         "look who it is",
         "well hello"
     };
+    private static final Set<String> ARRIVAL_ONLY = new HashSet<>(Arrays.asList(
+        "{greeting} it's {player}", "{player} i actually caught you online",
+        "{player} the cc won't believe this", "{player} i've seen you around before",
+        "{player} let me get my clan over here", "{player} the timing is perfect",
+        "{player} found before i finished my farm run"
+    ));
+    private static final String[] FAMILIAR_GREETINGS = {"yo", "hey", "btw", "so", "anyway"};
     private static final String[] PRAISE = {
         "clean",
         "goated",
@@ -99,6 +106,11 @@ public final class FanDialogueGenerator {
 
     static FanUtterance generateUtterance(
             Random random, FanPersonality personality, FanChatContext context, int lengthRoll) {
+        return generateUtterance(random, personality, context, lengthRoll, true);
+    }
+
+    static FanUtterance generateUtterance(Random random, FanPersonality personality,
+            FanChatContext context, int lengthRoll, boolean newcomer) {
         FanUtterance keyboard = ChatTypingStyle.keyboard(random, personality);
         if (keyboard != null) return keyboard;
         String category;
@@ -122,11 +134,11 @@ public final class FanDialogueGenerator {
                     random.nextBoolean()
                             ? "social"
                             : personality.name().toLowerCase(Locale.ENGLISH);
-        FanUtterance line = lengthRoll >= 90 ? lineUtterance(category, context, random, true)
+        FanUtterance line = lengthRoll >= 90 ? lineUtterance(category, context, random, true, newcomer)
                 : QuickChatComposer.generate(random, personality.name(), context.player, category,
                 context.gear.toLowerCase(Locale.ENGLISH), context.target,
                 context.skill == null ? "" : context.skill.getName().toLowerCase(Locale.ENGLISH),
-                lengthRoll < 80);
+                lengthRoll < 80, newcomer);
         return ChatTypingStyle.apply(line, random, personality, context.player, context.target, context.gear,
                 context.skill == null ? "" : context.skill.getName());
     }
@@ -162,8 +174,14 @@ public final class FanDialogueGenerator {
 
     private static FanUtterance lineUtterance(
             String category, FanChatContext context, Random random, boolean decorate) {
+        return lineUtterance(category, context, random, decorate, true);
+    }
+
+    private static FanUtterance lineUtterance(String category, FanChatContext context,
+            Random random, boolean decorate, boolean newcomer) {
         List<String> valid = new ArrayList<>();
         for (String pattern : PATTERNS.getOrDefault(category, PATTERNS.get("social"))) {
+            if (!newcomer && ARRIVAL_ONLY.contains(pattern)) continue;
             if (pattern.contains("{level}") && context.level <= 0
                     || pattern.contains("{xp}") && context.gainedXp <= 0
                     || pattern.contains("{skill}") && context.skill == null) continue;
@@ -187,13 +205,13 @@ public final class FanDialogueGenerator {
                                         : context.skill.getName().toLowerCase(Locale.ENGLISH))
                         .replace("{level}", Integer.toString(context.level))
                         .replace("{xp}", Integer.toString(context.gainedXp))
-                        .replace("{greeting}", pick(GREETINGS, random))
+                        .replace("{greeting}", pick(newcomer ? GREETINGS : FAMILIAR_GREETINGS, random))
                         .replace("{praise}", pick(PRAISE, random))
                         .replace("{request}", pick(REQUESTS, random))
                         .replace("{activity}", pick(ACTIVITIES, random))
                         .replace("{goal}", pick(GOALS, random))
                         .replace("{supply}", pick(SUPPLIES, random));
-        if (decorate && random.nextInt(7) == 0) result = pick(GREETINGS, random) + ", " + result;
+        if (decorate && random.nextInt(7) == 0) result = pick(newcomer ? GREETINGS : FAMILIAR_GREETINGS, random) + ", " + result;
         if (decorate && random.nextInt(5) == 0 && !result.endsWith("?"))
             result += pick(ENDINGS, random);
         if (decorate && random.nextInt(24) == 0) result = result.toUpperCase(Locale.ENGLISH);

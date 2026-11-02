@@ -59,7 +59,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "crowdSize",
             name = "Crowd size",
-            description = "Maximum simulated fans; attendance varies slightly over time",
+            description = "Approximate crowd size, capped here; individuals arrive and leave independently",
             section = crowd,
             position = 0)
     default int crowdSize() {
@@ -99,7 +99,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "respectPersonalSpace",
             name = "Personal space",
-            description = "Prefer nearby open tiles without leaving an empty ring around you",
+            description = "Keep your tile clear and prefer nearby open tiles; followers can share tiles",
             section = crowd,
             position = 2)
     default boolean respectPersonalSpace() {
@@ -110,7 +110,7 @@ public interface CelebrityModeConfig extends Config {
     @ConfigItem(
             keyName = "maxSpread",
             name = "Maximum spread",
-            description = "Maximum width for fans clicking alongside the following crowd",
+            description = "Gathering radius and travelling width; followers can remain farther behind on your path",
             section = crowd,
             position = 3)
     default int maxSpread() {

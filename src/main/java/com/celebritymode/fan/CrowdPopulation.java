@@ -15,18 +15,18 @@ public final class CrowdPopulation {
             nextChange = nextSurvey;
         }
         if (tick >= nextSurvey) {
-            int range = Math.min(cap - 1, Math.max(1, (int) Math.ceil(cap * 0.08)));
+            int range = Math.min(cap - 1, Math.max(1, (int) Math.ceil(cap * 0.20)));
             // Nearby real players are a local activity proxy, not a world population census.
             double activity = Math.min(1, Math.max(0, nearbyPlayers) / 40.0);
             double evening = (1 + Math.cos((hour - 20) * Math.PI / 12)) / 2;
             int missing = (int) Math.round(range *
                     (0.25 * (1 - activity) + 0.20 * (1 - evening) + 0.55 * random.nextDouble()));
             target = Math.max(1, cap - missing);
-            nextSurvey = tick + 200 + random.nextInt(300);
+            nextSurvey = tick + 80 + random.nextInt(180);
         }
         if (tick >= nextChange) {
             attendance += Integer.signum(target - attendance);
-            nextChange = tick + 60 + random.nextInt(100);
+            nextChange = tick + 25 + random.nextInt(65);
         }
         return attendance;
     }

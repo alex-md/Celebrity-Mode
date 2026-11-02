@@ -10,6 +10,22 @@ import java.util.*;
 
 public class FanDialogueGeneratorTest {
     @Test
+    public void establishedFansDoNotRediscoverThePlayerInAnyLengthOrPersonality() {
+        Random random = new Random(870);
+        Set<String> variety = new HashSet<>();
+        for (int i = 0; i < 12000; i++) {
+            com.celebritymode.generation.FanUtterance line = FanDialogueGenerator.generateUtterance(
+                    random, FanPersonality.values()[i % 6], FanChatContext.idle("Hero", ""), i % 100, false);
+            String pattern = line.structure == null ? "" : line.structure;
+            assertFalse(pattern, pattern.contains("{real}"));
+            assertFalse(pattern, pattern.contains("it's {player}") || pattern.contains("is that {player}"));
+            assertFalse(pattern, pattern.contains("found you") || pattern.contains("lookalike") || pattern.contains("same world"));
+            variety.add(line.text);
+        }
+        assertTrue(variety.size() > 1000);
+    }
+
+    @Test
     public void composableDialogueHasBroadVarietyAndUsesCurrentName() {
         Random random = new Random(5);
         Set<String> lines = new HashSet<>();

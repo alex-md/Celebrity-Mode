@@ -14,8 +14,166 @@ import java.util.*;
 
 public class FanManagerTest {
     @Test
+    public void distantOnSceneFollowerCatchesUpOnFootInsteadOfRepairingToDestination() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 1;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        FanEntity fan = scene.manager.getFans().get(0);
+        fan.position = FormationPlanner.offset(scene.playerPosition, 35, 0);
+        fan.renderLocation = LocalPoint.fromWorld(scene.view, fan.position).plus(fan.tileJitterX, fan.tileJitterY);
+        fan.orientation = fan.targetOrientation = 512;
+        RuneLiteObject object = fan.object;
+        for (int tick = 0; tick < 25; tick++) {
+            WorldPoint before = fan.position;
+            scene.tick();
+            assertSame(object, fan.object);
+            assertTrue("At most two running segments across a server interval", before.distanceTo(fan.position) <= 4);
+        }
+        assertTrue(fan.position.distanceTo(scene.playerPosition) <= scene.config.spread);
+        scene.manager.cleanup();
+    }
+
+    @Test
+    public void initialArrivalsUseMovementHeadingsInsteadOfArbitraryLookAtAngles() {
+        TestScene scene = new TestScene();
+        scene.config.size = 100;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        for (FanEntity fan : scene.manager.getFans()) {
+            assertEquals(0, fan.orientation % 256);
+            assertEquals(fan.orientation, fan.targetOrientation);
+        }
+        scene.manager.cleanup();
+    }
+
+    @Test
+    public void stationaryFansDoNotTrackPlayerOrCompanionWithTheirBodies() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 1;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        FanEntity fan = scene.manager.getFans().get(0);
+        fan.position = FormationPlanner.offset(scene.playerPosition, 1, 1);
+        fan.renderLocation = LocalPoint.fromWorld(scene.view, fan.position).plus(fan.tileJitterX, fan.tileJitterY);
+        fan.target = fan.followTarget = fan.idleTarget = fan.position;
+        fan.stopTargetChosen = true;
+        fan.nextWanderTick = Integer.MAX_VALUE;
+        fan.orientation = fan.targetOrientation = 1280; // Last step was NE, player is SW.
+        scene.animations.setState(fan, FanState.IDLE);
+        for (int tick = 0; tick < 100; tick++) {
+            scene.tick();
+            scene.manager.onClientTick();
+            assertNull(fan.movementPath);
+            assertEquals(1280, fan.orientation);
+            assertEquals(1280, fan.targetOrientation);
+        }
+    }
+
+    @Test
+    public void blockedFollowersWaitAndResumeWithoutRespawningThroughTheWall() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 1;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        FanEntity fan = scene.manager.getFans().get(0);
+        WorldPoint trapped = FormationPlanner.offset(scene.playerPosition, 4, 0);
+        fan.position = trapped;
+        fan.renderLocation = LocalPoint.fromWorld(scene.view, trapped).plus(fan.tileJitterX, fan.tileJitterY);
+        fan.followTarget = scene.playerPosition;
+        fan.stopTargetChosen = true;
+        fan.orientation = fan.targetOrientation = 512;
+        RuneLiteObject object = fan.object;
+        LocalPoint local = LocalPoint.fromWorld(scene.view, trapped);
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++)
+                if (dx != 0 || dy != 0)
+                    scene.flags[local.getSceneX() + dx][local.getSceneY() + dy] = CollisionDataFlag.BLOCK_MOVEMENT_FULL;
+        int longestStall = 0;
+        for (int tick = 0; tick < 65; tick++) {
+            scene.tick();
+            assertSame(object, fan.object);
+            assertEquals("No visible teleport after the stall timeout", trapped, fan.position);
+            longestStall = Math.max(longestStall, fan.stalledTicks);
+        }
+        assertTrue("Exercised the old visible-repair threshold", longestStall > 20);
+        for (int dx = -1; dx <= 1; dx++)
+            for (int dy = -1; dy <= 1; dy++) scene.flags[local.getSceneX() + dx][local.getSceneY() + dy] = 0;
+        for (int tick = 0; tick < 8; tick++) scene.tick();
+        assertSame(object, fan.object);
+        assertTrue(fan.position.distanceTo(scene.playerPosition) <= scene.config.spread);
+    }
+
+    @Test
+    public void idleVisitsReplaceIdentitiesWithWalkedDeparturesAndStaggeredNewcomers() {
+        TestScene scene = new TestScene();
+        scene.config.size = 20;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.tick();
+        Set<Integer> originals = new HashSet<>(), seen = new HashSet<>();
+        for (FanEntity fan : scene.manager.getFans()) originals.add(fan.id);
+        Map<Integer, WorldPoint> leavingFrom = new HashMap<>();
+        Map<Integer, RuneLiteObject> leavingObjects = new HashMap<>();
+        int walked = 0, belowTarget = 0, full = 0;
+        for (int tick = 0; tick < 2200; tick++) {
+            scene.tick();
+            assertTrue(scene.manager.getFans().size() <= 20);
+            assertTrue(scene.active.size() <= 20);
+            if (scene.active.size() < 20) belowTarget++; else full++;
+            Set<String> names = new HashSet<>();
+            for (FanEntity fan : scene.manager.getFans()) {
+                seen.add(fan.id);
+                assertTrue(names.add(fan.displayName));
+                if (fan.departing && fan.position != null) {
+                    WorldPoint start = leavingFrom.putIfAbsent(fan.id, fan.position);
+                    leavingObjects.put(fan.id, fan.object);
+                    if (start != null && !start.equals(fan.position)) walked++;
+                    assertNull("Departing fans stop unrelated chatter", fan.overheadText);
+                }
+            }
+        }
+        assertTrue("Identity churn happens even while idle", seen.size() > 60);
+        assertTrue("People visibly walk away", walked > 20);
+        assertTrue("Brief gaps and returns", belowTarget > 0 && full > 0);
+        assertTrue("All original visits eventually finish", scene.manager.getFans().stream().noneMatch(f -> originals.contains(f.id)));
+        Set<RuneLiteObject> survivors = new HashSet<>();
+        for (FanEntity fan : scene.manager.getFans()) survivors.add(fan.object);
+        for (RuneLiteObject departed : leavingObjects.values())
+            if (!survivors.contains(departed)) assertFalse(departed.isActive());
+        scene.manager.cleanup();
+        assertTrue(scene.active.isEmpty());
+    }
+
+    @Test
+    public void changingIdleSpreadRepositionsExistingObjectsAndBoundsSubsequentWandering() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 12;
+        scene.config.spread = 8;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.populate();
+        Map<Integer, RuneLiteObject> objects = new HashMap<>();
+        for (FanEntity fan : scene.manager.getFans()) objects.put(fan.id, fan.object);
+        scene.config.spread = 2;
+        scene.manager.onConfigChanged("maxSpread");
+        for (int tick = 0; tick < 200; tick++) {
+            scene.tick();
+            if (tick < 30) continue;
+            for (FanEntity fan : scene.manager.getFans()) {
+                assertSame(objects.get(fan.id), fan.object);
+                assertTrue(fan.position.distanceTo(scene.playerPosition) <= 2);
+                assertNotEquals(scene.playerPosition, fan.target);
+            }
+        }
+    }
+
+    @Test
     public void sizesResizeAndCleanShutdown() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         for (int size : new int[] {1, 8, 30, 60, 100, 8, 1}) {
             scene.config.size = size;
             scene.populate();
@@ -31,6 +189,7 @@ public class FanManagerTest {
     @Test
     public void hiddenCrowdUnregistersObjectsAndReturnsWithSavedSettings() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 100;
         scene.config.arrival = ArrivalPace.INSTANT;
         scene.tick();
@@ -62,6 +221,7 @@ public class FanManagerTest {
     @Test
     public void persistentModelsAndTargetedConfigChanges() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.populate();
         int builds = scene.modelBuilds;
         RuneLiteObject object = scene.manager.getFans().get(0).object;
@@ -91,6 +251,7 @@ public class FanManagerTest {
     @Test
     public void settledFollowersApplyLayoutSettingsWithoutPlayerMovement() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.arrival = ArrivalPace.INSTANT;
         scene.populate();
         FanEntity follower = scene.manager.getFans().stream().filter(f -> !new FormationPlanner(scene.config, scene.collision).shouldGather(f, 1000)).findFirst().get();
@@ -119,6 +280,7 @@ public class FanManagerTest {
     @Test
     public void teleportPlaneAndWorldViewChanges() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.populate();
         for (int transition = 0; transition < 4; transition++) {
             List<RuneLiteObject> old = new ArrayList<>();
@@ -139,7 +301,7 @@ public class FanManagerTest {
             for (RuneLiteObject object : old) assertFalse(object.isActive());
             scene.populate();
             assertEquals(scene.manager.getFans().size(), scene.active.size());
-            assertTrue(scene.active.size() >= 7 && scene.active.size() <= 8);
+            assertTrue(scene.active.size() >= 6 && scene.active.size() <= 8);
             for (FanEntity fan : scene.manager.getFans())
                 assertEquals(scene.viewId, fan.renderLocation.getWorldView());
         }
@@ -155,17 +317,18 @@ public class FanManagerTest {
         assertTrue(scene.active.isEmpty());
         scene.populate();
         assertEquals(scene.manager.getFans().size(), scene.active.size());
-        assertTrue(scene.active.size() >= 7 && scene.active.size() <= 8);
+        assertTrue(scene.active.size() >= 6 && scene.active.size() <= 8);
         scene.manager.onGameTick(null);
         assertTrue(scene.active.isEmpty());
         scene.populate();
         assertEquals(scene.manager.getFans().size(), scene.active.size());
-        assertTrue(scene.active.size() >= 7 && scene.active.size() <= 8);
+        assertTrue(scene.active.size() >= 6 && scene.active.size() <= 8);
     }
 
     @Test
     public void regionLoadingRebasesWithoutReplacingObjectsOrRestartingArrival() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 30;
         scene.populate();
         List<RuneLiteObject> objects = new ArrayList<>();
@@ -215,6 +378,7 @@ public class FanManagerTest {
     @Test
     public void longRunAcrossRepeatedRegionBoundariesKeepsTheSameCrowd() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 30;
         scene.populate();
         List<RuneLiteObject> objects = new ArrayList<>();
@@ -252,6 +416,7 @@ public class FanManagerTest {
     @Test
     public void aRealTeleportAfterLoadingStillRestartsArrivals() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.populate();
         scene.state = GameState.LOADING;
         scene.manager.onGameStateChanged(GameState.LOADING);
@@ -268,6 +433,7 @@ public class FanManagerTest {
     @Test
     public void inactiveIndividualRepairsWithoutReplacingCrowd() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.populate();
         RuneLiteObject survivor = scene.manager.getFans().get(1).object;
         scene.manager.getFans().get(0).object.setActive(false);
@@ -279,6 +445,7 @@ public class FanManagerTest {
     @Test
     public void cacheRetryAndEquipmentFallback() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.bodyCacheReady = false;
         for (int i = 0; i < 8; i++) scene.tick();
         assertTrue(scene.active.isEmpty());
@@ -297,6 +464,7 @@ public class FanManagerTest {
     @Test
     public void animationsReuseControllerAndCompleteReactions() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.arrival = ArrivalPace.INSTANT;
         scene.tick(); // Isolate the cache check before random idle emotes can preload the wave.
 
@@ -323,6 +491,7 @@ public class FanManagerTest {
     @Test
     public void sustainedThirtyFanScene() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 30;
         scene.populate();
         for (int x = 35; x < 45; x++) scene.flags[x][43] = CollisionDataFlag.BLOCK_MOVEMENT_FULL;
@@ -358,7 +527,7 @@ public class FanManagerTest {
         for (int i = 0; i < 100; i++) scene.tick();
         assertEquals(30, scene.modelBuilds);
         for (FanEntity fan : scene.manager.getFans())
-            assertTrue(fan.position.distanceTo(scene.playerPosition) <= 6);
+            assertTrue(fan.position.distanceTo(scene.playerPosition) <= 12);
         scene.manager.cleanup();
         assertTrue(scene.active.isEmpty());
     }
@@ -367,6 +536,7 @@ public class FanManagerTest {
     public void hundredFansMoveAndGatherAcrossAllFormations() {
         for (FormationStyle style : FormationStyle.values()) {
             TestScene scene = new TestScene();
+        scene.holdVisitors = true;
             scene.config.size = 100;
             scene.config.arrival = ArrivalPace.INSTANT;
             scene.config.formation = style;
@@ -386,10 +556,10 @@ public class FanManagerTest {
             assertEquals(100, scene.modelBuilds);
             Set<WorldPoint> occupied = new HashSet<>();
             for (FanEntity fan : scene.manager.getFans()) {
-                assertTrue(fan.position.distanceTo(scene.playerPosition) <= 6);
+                assertTrue(fan.position.distanceTo(scene.playerPosition) <= 12);
                 occupied.add(fan.position);
             }
-            assertTrue("Larger crowds spread beyond the old close radius", occupied.size() > 20);
+            assertTrue("Following allows tile sharing without allocating a square", occupied.size() >= 4 && occupied.size() < 70);
             scene.manager.cleanup();
             assertTrue(scene.active.isEmpty());
         }
@@ -398,6 +568,7 @@ public class FanManagerTest {
     @Test
     public void wordOfMouthArrivalsApproachFromOutsideAndRestartOnEnable() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 30;
         scene.tick(); // The cascade begins at tick 1.
         assertTrue(scene.active.isEmpty());
@@ -433,6 +604,7 @@ public class FanManagerTest {
     @Test
     public void regionReloadPreservesThePendingWordOfMouthCascade() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 30;
         for (int i = 0; i < 10; i++) scene.tick();
         assertEquals(1, scene.active.size());
@@ -457,6 +629,7 @@ public class FanManagerTest {
     public void idleCrowdsMostlyHoldPositionInEveryModeWithRareEmotes() {
         for (FormationStyle style : FormationStyle.values()) {
             TestScene scene = new TestScene();
+        scene.holdVisitors = true;
             scene.config.size = 30;
             scene.config.formation = style;
             scene.populate();
@@ -490,9 +663,9 @@ public class FanManagerTest {
                 }
                 assertTrue("At least 90% remain still each tick in " + style, moving <= 3);
             }
-            assertTrue("Balanced activity in " + style + ": " + steps, steps > 120 && steps < 450);
-            assertTrue("Movement is shared across the social fans",
-                    walks.values().stream().filter(count -> count >= 3).count() >= 12);
+            assertTrue("Balanced activity in " + style + ": " + steps, steps > 10 && steps < 200);
+            assertTrue("Several fans reposition without requiring everyone to pace",
+                    walks.size() >= 8);
             long gathering = scene.manager.getFans().stream().filter(f -> f.idleTarget != null).count();
             assertTrue(gathering >= 15 && gathering <= 20);
             assertTrue(front && back);
@@ -503,6 +676,7 @@ public class FanManagerTest {
     @Test
     public void attendanceTurnoverPreservesSurvivorsAndUnregistersDepartures() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 100;
         scene.config.arrival = ArrivalPace.INSTANT;
         scene.tick();
@@ -513,7 +687,7 @@ public class FanManagerTest {
             int prior = before.size();
             scene.tick();
             int count = scene.manager.getFans().size();
-            assertTrue(count >= 92 && count <= 100);
+            assertTrue(count >= 80 && count <= 100);
             assertTrue(Math.abs(count - prior) <= 1);
             assertEquals(count, scene.active.size());
             joined |= count > prior;
@@ -541,6 +715,7 @@ public class FanManagerTest {
             for (FormationStyle style : FormationStyle.values()) {
                 for (int[] direction : directions) {
                     TestScene scene = new TestScene();
+        scene.holdVisitors = true;
                     scene.config.formation = style;
                     scene.config.size = 8;
                     // Isolate stale destinations from legitimate personal-space repositioning.
@@ -579,6 +754,7 @@ public class FanManagerTest {
     public void runningCrowdHasStableDestinationsAndNoStopStartCatchup() {
         for (FormationStyle style : FormationStyle.values()) {
             TestScene scene = new TestScene();
+        scene.holdVisitors = true;
             scene.config.formation = style;
             scene.config.size = 30;
             scene.config.arrival = ArrivalPace.INSTANT;
@@ -587,24 +763,27 @@ public class FanManagerTest {
                 scene.playerPosition = FormationPlanner.offset(scene.playerPosition, 0, 2);
                 scene.tick();
             }
-            for (int i = 0; i < 5; i++) scene.tick(); // Independent stop decisions finish.
             Map<Integer, WorldPoint> destinations = new HashMap<>();
-            for (FanEntity fan : scene.manager.getFans()) destinations.put(fan.id, fan.target);
             int advances = 0;
-            for (int i = 0; i < 18; i++) {
+            for (int i = 0; i < 23; i++) {
                 Map<Integer, WorldPoint> positions = new HashMap<>();
                 for (FanEntity fan : scene.manager.getFans()) positions.put(fan.id, fan.position);
                 scene.tick();
                 for (FanEntity fan : scene.manager.getFans()) {
-                    assertEquals("Stop destination stays fixed in " + style,
-                            destinations.get(fan.id), fan.target);
+                    if (destinations.containsKey(fan.id))
+                        assertEquals("Once chosen, a stop destination stays fixed in " + style,
+                                destinations.get(fan.id), fan.target);
+                    if (fan.stopTargetChosen) destinations.put(fan.id, fan.target);
                     WorldPoint prior = positions.get(fan.id);
                     if (!prior.equals(fan.target)) {
-                        assertNotEquals("Catchup advances every tick in " + style, prior, fan.position);
+                        assertTrue("Catchup advances or is already rendering a step in " + style,
+                                !prior.equals(fan.position) || fan.movementPath != null
+                                        || fan.nextMovementCycle > scene.cycle);
                         advances++;
                     } else assertEquals("Settled followers stay put", prior, fan.position);
                 }
             }
+            assertEquals("Each fan eventually makes its own stop decision", 30, destinations.size());
             assertTrue("Exercise catching up in " + style, advances > 0);
             scene.manager.cleanup();
         }
@@ -613,6 +792,7 @@ public class FanManagerTest {
     @Test
     public void recentlyStoppedTrainKeepsFollowingThenMinorityGathersAndResumes() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 100;
         scene.config.arrival = ArrivalPace.INSTANT;
         scene.tick();
@@ -629,7 +809,11 @@ public class FanManagerTest {
         }
         for (FanEntity fan : scene.manager.getFans())
             if (!fan.position.equals(stopped.get(fan.id))) catchup++;
-        assertTrue("Followers finish catching up after a stop", catchup > 50);
+        assertTrue("Some followers still finish their approach", catchup > 0);
+        for (FanEntity fan : scene.manager.getFans()) {
+            assertEquals("Followers settle at their own destination", fan.target, fan.position);
+            assertNull(fan.movementPath);
+        }
         for (int tick = 0; tick < 120; tick++) scene.tick();
         long gathering = scene.manager.getFans().stream().filter(f -> f.idleTarget != null).count();
         assertTrue(gathering >= 50 && gathering <= 60);
@@ -648,6 +832,7 @@ public class FanManagerTest {
     @Test
     public void movingCrowdDoesNotStartEmotesAndStationaryReactionHoldsItsTile() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 8;
         scene.populate();
         for (int i = 0; i < 500; i++) {
@@ -661,6 +846,7 @@ public class FanManagerTest {
         FanEntity fan = scene.manager.getFans().get(0);
         scene.animations.setState(fan, FanState.IDLE);
         fan.movementPath = null;
+        fan.orientation = fan.targetOrientation; // A settled fan, rather than one still finishing a turn.
         scene.animations.react(fan, false);
         WorldPoint position = fan.position;
         for (int i = 0; i < 3; i++) {
@@ -675,6 +861,7 @@ public class FanManagerTest {
     public void settledCrowdReactsToDepartureAcrossSeveralTicks() {
         for (FormationStyle style : FormationStyle.values()) {
             TestScene scene = new TestScene();
+        scene.holdVisitors = true;
             scene.config.size = 30;
             scene.config.formation = style;
             scene.config.arrival = ArrivalPace.INSTANT;
@@ -702,6 +889,7 @@ public class FanManagerTest {
     @Test
     public void runningTurnsInterpolateThroughIntermediateTile() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 1;
         scene.populate();
         FanEntity fan = scene.manager.getFans().get(0);
@@ -713,6 +901,7 @@ public class FanManagerTest {
                     new LocalPoint(start.getX() + 128, start.getY() + 128, scene.view)
                 };
         fan.movementStartCycle = scene.cycle;
+        fan.movementDurationCycles = 30;
         scene.movement.render(fan, scene.view, scene.cycle + 15);
         assertEquals(start.getX() + 128, fan.renderLocation.getX());
         assertEquals(start.getY(), fan.renderLocation.getY());
@@ -724,11 +913,14 @@ public class FanManagerTest {
     @Test
     public void walkRunAndInterpolation() {
         TestScene scene = new TestScene();
+        scene.holdVisitors = true;
         scene.config.size = 1;
         scene.populate();
         FanEntity fan = scene.manager.getFans().get(0);
-        // Complete the previous independently scheduled wander before testing a fresh segment.
+        // Isolate a standard 30-cycle step from the manager's personal pace and pending clicks.
         scene.movement.render(fan, scene.view, scene.cycle + 30);
+        fan.nextMovementCycle = 0;
+        fan.movementDurationCycles = 30;
         WorldPoint start = fan.position;
         MovementTrail trail = new MovementTrail();
         trail.update(start);
@@ -753,4 +945,66 @@ public class FanManagerTest {
         scene.movement.render(fan, scene.view, scene.cycle + 60);
         assertEquals(x + 384, fan.renderLocation.getX());
     }
+    @Test
+    public void travellingFollowersRefreshReachedClicksBeforeTheirTimerExpires() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 1;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.populate();
+        for (int i = 0; i < 12; i++) {
+            scene.playerPosition = FormationPlanner.offset(scene.playerPosition, 0, 1);
+            scene.tick();
+        }
+        FanEntity fan = scene.manager.getFans().get(0);
+        fan.movementPath = null;
+        fan.followTarget = fan.position;
+        fan.nextFollowTick = Integer.MAX_VALUE;
+        WorldPoint before = fan.position;
+        scene.playerPosition = FormationPlanner.offset(scene.playerPosition, 0, 1);
+        scene.tick();
+        assertNotEquals("Reached clicks do not impose another idle tick", before, fan.position);
+        assertTrue(fan.nextFollowTick < Integer.MAX_VALUE);
+        scene.manager.cleanup();
+    }
+
+    @Test
+    public void unevenServerTicksDoNotMakeTheRunningCrowdFreezeInWaves() {
+        TestScene scene = new TestScene();
+        scene.holdVisitors = true;
+        scene.config.size = 30;
+        scene.config.arrival = ArrivalPace.INSTANT;
+        scene.populate();
+        int longestWholeCrowdPause = 0, pause = 0;
+        Set<Integer> phases = new HashSet<>();
+        Set<Integer> paces = new HashSet<>();
+        for (int tick = 0; tick < 28; tick++) {
+            scene.playerPosition = FormationPlanner.offset(scene.playerPosition, 0, 2);
+            for (int cycle = 0; cycle < (tick % 2 == 0 ? 29 : 31); cycle++) {
+                List<LocalPoint> before = new ArrayList<>();
+                for (FanEntity fan : scene.manager.getFans()) before.add(fan.renderLocation);
+                scene.clientCycles(1);
+                int movers = 0;
+                for (int j = 0; j < before.size(); j++) {
+                    FanEntity fan = scene.manager.getFans().get(j);
+                    if (!before.get(j).equals(fan.renderLocation)) movers++;
+                    if (tick > 8 && fan.movementPath != null) {
+                        phases.add(Math.floorMod(fan.movementStartCycle, 30));
+                        paces.add(fan.movementDurationCycles);
+                    }
+                }
+                if (tick > 8) {
+                    pause = movers == 0 ? pause + 1 : 0;
+                    longestWholeCrowdPause = Math.max(longestWholeCrowdPause, pause);
+                }
+            }
+            scene.manager.onGameTick(scene.player);
+        }
+        assertTrue("No recurring whole-tick group freeze: " + longestWholeCrowdPause,
+                longestWholeCrowdPause < 5);
+        assertTrue("Individuals have different step phases", phases.size() >= 10);
+        assertTrue("Individual pace variation survives continuous travel", paces.size() >= 3);
+        scene.manager.cleanup();
+    }
+
 }

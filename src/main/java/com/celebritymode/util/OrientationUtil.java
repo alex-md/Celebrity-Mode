@@ -8,8 +8,13 @@ public final class OrientationUtil {
         return ((int) Math.round(Math.atan2(-dx, -dy) * 1024 / Math.PI)) & 2047;
     }
 
+    public static int delta(int current, int target) {
+        return ((target - current + 1024) & 2047) - 1024;
+    }
+
     public static int approach(int current, int target) {
-        int delta = ((target - current + 1024) & 2047) - 1024;
-        return (current + Math.max(-96, Math.min(96, delta))) & 2047;
+        int delta = delta(current, target);
+        // One 20 ms client cycle; rendering the same cycle twice must not turn twice.
+        return (current + Math.max(-32, Math.min(32, delta))) & 2047;
     }
 }

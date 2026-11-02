@@ -37,53 +37,73 @@ public class FormationPlanner {
     public WorldPoint chooseTarget(
             FanEntity fan, WorldPoint player, int dx, int dy, MovementTrail trail,
             Set<WorldPoint> reserved, int stationaryTicks) {
-        int spread = Math.max(1, Math.min(8, config.maxSpread()));
+        int spread = spread();
         boolean train = config.formationStyle() == FormationStyle.TRAIL;
-        int delay = train ? 1 + fan.trailOffset : 1 + fan.trailOffset / 3;
-        WorldPoint anchor = trail.getFollowingPoint(stationaryTicks > 0 ? 0 : delay);
+        int delay = train ? 1 + fan.trailOffset : 1 + fan.trailOffset / 2;
+        WorldPoint anchor = trail.getFollowingPoint(delay);
         if (anchor == null) anchor = player;
         int width = train ? 1 : spread;
+        // Orient offsets along this part of the route, not the leader's latest turn.
+        WorldPoint behind = trail.getFollowingPoint(delay + 1);
+        int hx = behind == null ? dx : Integer.signum(anchor.getX() - behind.getX());
+        int hy = behind == null ? dy : Integer.signum(anchor.getY() - behind.getY());
+        if (hx == 0 && hy == 0) { hx = dx; hy = dy; }
         WorldPoint preferred;
-        if (stationaryTicks > 0) {
-            // Independent clicks into a dense patch, not assigned positions on a ring.
-            int reach = Math.min(6, Math.max(2,
-                    (int) Math.ceil(Math.sqrt(config.crowdSize() / 6.0))));
+        boolean followingRoute = stationaryTicks == 0 && trail.size() > 1;
+        if (stationaryTicks > 0 && !followingRoute) {
+            // Each person chooses a nearby viewing spot after noticing the stop.
+            // Travel breadcrumbs guide routes; they are not permanent resting slots.
+            anchor = player;
+            if (fan.position != null && validSettledTarget(fan.position, player)
+                    && collision.canOccupy(fan.position) && unit(fan.id, 307) < 0.35) {
+                reserved.add(fan.position);
+                return fan.position;
+            }
+            double reach = spread * 0.9;
             int x = (int) Math.round((unit(fan.id, 17) - unit(fan.id, 43)) * reach);
             int y = (int) Math.round((unit(fan.id, 71) - unit(fan.id, 97)) * reach);
             preferred = offset(player, x, y);
         } else {
-            // Most followers use the same breadcrumbs. Spread is an upper bound for the
-            // minority who click alongside the pack, rather than a minimum separation.
-            int lateral = unit(fan.id, 13) < (train ? 0.8 : 0.6) ? 0
+            // Each person retains a preferred lateral click; Trail favors shared breadcrumbs.
+            // Spread bounds that preference rather than enforcing minimum separation.
+            int lateral = unit(fan.id, 13) < (train ? 0.8 : 0.15) ? 0
                     : (int) Math.round((unit(fan.id, 29) - unit(fan.id, 53)) * width);
-            int hx = Integer.signum(dx), hy = Integer.signum(dy);
             preferred = offset(anchor, -hy * lateral, hx * lateral);
         }
-        if (stationaryTicks == 0 && fan.position != null
+        if (fan.position != null && (stationaryTicks == 0 || followingRoute)
                 && (preferred.getX() - fan.position.getX()) * dx
                         + (preferred.getY() - fan.position.getY()) * dy < 0
-                && collision.canOccupy(fan.position)) {
+                && collision.canOccupy(fan.position)
+                && (!config.respectPersonalSpace() || !fan.position.equals(player))) {
             reserved.add(fan.position);
             return fan.position;
         }
         WorldPoint best = null;
         double bestScore = Double.MAX_VALUE;
-        // Sharing is normal in OSRS. Space only adds a small preference for nearby free
-        // tiles; it never excludes an entire radius or forces a large crowd to fan out.
-        for (int x = -2; x <= 2; x++)
-            for (int y = -2; y <= 2; y++) {
+        // Personal space is local etiquette, not a requirement to allocate every fan a unique tile.
+        // Stopped fans can use the whole nearby patch instead of retaining marching slots.
+        int search = stationaryTicks > 0 && !followingRoute ? spread : 1;
+        for (int x = -search; x <= search; x++)
+            for (int y = -search; y <= search; y++) {
                 WorldPoint candidate = offset(preferred, x, y);
                 if (!collision.canOccupy(candidate) || !connected(anchor, candidate)
-                        || (stationaryTicks > 0 && candidate.distanceTo(player) > 6)) continue;
-                if (stationaryTicks == 0) {
-                    int lateralDistance = Math.abs(-dy * (candidate.getX() - anchor.getX())
-                            + dx * (candidate.getY() - anchor.getY()));
-                    if (lateralDistance > width * (Math.abs(dx) + Math.abs(dy))) continue;
+                        || (stationaryTicks > 0 && !followingRoute && !insideSocialPatch(candidate, player))) continue;
+                if (followingRoute) {
+                    if ((candidate.getX() - player.getX()) * dx
+                            + (candidate.getY() - player.getY()) * dy > 0) continue;
+                }
+                if (stationaryTicks == 0 || followingRoute) {
+                    int lateralDistance = Math.abs(-hy * (candidate.getX() - anchor.getX())
+                            + hx * (candidate.getY() - anchor.getY()));
+                    if (lateralDistance > width * (Math.abs(hx) + Math.abs(hy))) continue;
                 }
                 double score = x * x + y * y + unit(fan.id, x * 31 + y * 101) * 0.3;
+                if (stationaryTicks > 0 && fan.position != null)
+                    score += candidate.distanceTo(fan.position) * 0.25;
+                if (stationaryTicks == 0 && candidate.equals(fan.followTarget)) score -= 0.8;
                 if (config.respectPersonalSpace()) {
-                    if (candidate.equals(player)) score += 3;
-                    if (reserved.contains(candidate)) score += 0.65;
+                    if (candidate.equals(player)) score += 10000;
+                    if (reserved.contains(candidate)) score += 1.05;
                 }
                 if (score < bestScore) {
                     best = candidate;
@@ -112,59 +132,62 @@ public class FormationPlanner {
     /** Stable groups of up to four share a loose patch, never assigned rows or a ring. */
     WorldPoint idleGroupCenter(FanEntity fan, WorldPoint player) {
         int group = fan.id / 4;
-        int reach = Math.min(4, Math.max(2,
-                (int) Math.ceil(Math.sqrt(Math.max(1, config.crowdSize()) / 8.0))));
+        int reach = spread();
         int x = (int) Math.round((unit(group, 107) - unit(group, 131)) * reach);
         int y = (int) Math.round((unit(group, 157) - unit(group, 181)) * reach);
         return offset(player, x, y);
     }
 
+    /** Each fan owns its destination and pause; there is no shared walking quota. */
     public WorldPoint chooseIdleTarget(
             FanEntity fan, WorldPoint player, Set<WorldPoint> reserved, Random random, int tick) {
-        return chooseIdleTarget(fan, player, reserved, random, tick, true);
-    }
-
-    /** Short walks separated by real pauses; the manager limits simultaneous wanderers. */
-    public WorldPoint chooseIdleTarget(
-            FanEntity fan, WorldPoint player, Set<WorldPoint> reserved, Random random, int tick,
-            boolean mayStartWalk) {
         if (fan.position == null) return null;
         if (fan.state == com.celebritymode.fan.FanState.REACTION) return fan.position;
+        if (fan.stalledTicks >= 3) {
+            fan.idleTarget = null;
+            fan.nextWanderTick = 0;
+        }
         if (fan.idleTarget != null && collision.canOccupy(fan.idleTarget)
-                && fan.idleTarget.distanceTo(player) <= 6) {
-            // Finish a walk even when the budget is full. A denied start must not
-            // abandon its destination or reset the person's own pause timer.
+                && (validSettledTarget(fan.idleTarget, player)
+                        || fan.idleTarget.distanceTo(player) < fan.position.distanceTo(player))) {
+            // Finish this person's click before considering another destination.
             if (!fan.idleTarget.equals(fan.position) || tick < fan.nextWanderTick)
                 return holdIdleTarget(fan, reserved);
         }
-        if (!mayStartWalk || tick < fan.nextWanderTick) {
+        boolean correcting = !validSettledTarget(fan.position, player);
+        if (!correcting && tick < fan.nextWanderTick) {
             reserved.add(fan.position);
             return fan.position;
         }
         boolean quiet = fan.personality == com.celebritymode.fan.FanPersonality.QUIET
                 || fan.personality == com.celebritymode.fan.FanPersonality.SCREENSHOTTER;
-        int pause = quiet ? 45 + random.nextInt(56) : 22 + random.nextInt(44);
+        int pause = quiet ? 65 + random.nextInt(86) : 35 + random.nextInt(66);
         fan.nextWanderTick = tick + pause;
-        // Occasionally keep chatting/watching instead of treating the timer as a command.
-        if (fan.idleTarget != null && random.nextInt(5) == 0)
-            return holdIdleTarget(fan, reserved);
         WorldPoint center = idleGroupCenter(fan, player);
         WorldPoint home = offset(center,
                 (int) Math.round(unit(fan.id, 211) * 2 - 1),
                 (int) Math.round(unit(fan.id, 239) * 2 - 1));
+        // Once near friends, watching is the default. Timers offer a chance to move;
+        // they do not require a lap around an assigned home tile.
+        if (!correcting && fan.position.distanceTo(home) <= 2 && random.nextInt(4) != 0) {
+            fan.idleTarget = fan.position;
+            return holdIdleTarget(fan, reserved);
+        }
         WorldPoint best = fan.position;
         double bestScore = Double.MAX_VALUE;
         for (int x = -2; x <= 2; x++)
             for (int y = -2; y <= 2; y++) {
                 WorldPoint candidate = offset(fan.position, x, y);
                 if (candidate.equals(fan.position) || candidate.equals(player)
-                        || candidate.distanceTo(player) > 6
+                        || (!insideSocialPatch(candidate, player)
+                                && candidate.distanceTo(player) >= fan.position.distanceTo(player))
                         || candidate.distanceTo(home) > Math.max(2, fan.position.distanceTo(home))
                         || !collision.canOccupy(candidate)
                         || !connected(fan.position, candidate)) continue;
                 double score = candidate.distanceTo(home) * 1.4
                         + candidate.distanceTo(fan.position) * 0.3 + random.nextDouble() * 2.0;
-                if (config.respectPersonalSpace() && reserved.contains(candidate)) score += 0.9;
+                if (candidate.distanceTo(player) > spread()) score += 100;
+                if (config.respectPersonalSpace() && reserved.contains(candidate)) score += 1.05;
                 if (score < bestScore) {
                     bestScore = score;
                     best = candidate;
@@ -172,6 +195,37 @@ public class FormationPlanner {
             }
         fan.idleTarget = best;
         return holdIdleTarget(fan, reserved);
+    }
+
+    private int spread() { return Math.max(1, Math.min(8, config.maxSpread())); }
+
+    public boolean validSettledTarget(WorldPoint target, WorldPoint player) {
+        return target != null && insideSocialPatch(target, player)
+                && (!config.respectPersonalSpace() || !target.equals(player));
+    }
+
+    private boolean insideSocialPatch(WorldPoint target, WorldPoint player) {
+        int x = target.getX() - player.getX(), y = target.getY() - player.getY();
+        return target.getPlane() == player.getPlane() && x * x + y * y <= spread() * spread();
+    }
+
+    /** Old clicks can finish while noticing the stop; chosen viewing spots stay local. */
+    public boolean validFollowingStop(FanEntity fan, WorldPoint player) {
+        return fan.followTarget != null && (fan.stopTargetChosen
+                ? validSettledTarget(fan.followTarget, player)
+                : fan.followTarget.distanceTo(player) <= Math.max(spread(), 12)
+                        && (!config.respectPersonalSpace() || !fan.followTarget.equals(player)));
+    }
+
+    public WorldPoint chooseDeparturePoint(FanEntity fan, WorldPoint player) {
+        for (int attempt = 0; attempt < 32; attempt++) {
+            double angle = fan.id * 2.399963229728653 + attempt * 0.4;
+            int radius = Math.max(9, spread() + 3);
+            WorldPoint point = offset(player, (int) Math.round(Math.cos(angle) * radius),
+                    (int) Math.round(Math.sin(angle) * radius));
+            if (collision.canOccupy(point) && connected(fan.position, point)) return point;
+        }
+        return null;
     }
 
     private WorldPoint holdIdleTarget(FanEntity fan, Set<WorldPoint> reserved) {

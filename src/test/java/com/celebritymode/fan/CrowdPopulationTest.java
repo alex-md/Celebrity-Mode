@@ -16,7 +16,7 @@ public class CrowdPopulationTest {
             for (int tick = 0; tick < 20000; tick++) {
                 int count = population.update(tick, cap, tick % 4000 < 2000 ? 0 : 40,
                         tick % 4000 < 2000 ? 4 : 20, random);
-                assertTrue(count >= Math.max(1, cap - (int) Math.ceil(cap * 0.08)));
+                assertTrue(count >= Math.max(1, cap - (int) Math.ceil(cap * 0.20)));
                 assertTrue(count <= cap);
                 if (tick < 600) assertEquals(cap, count);
                 assertTrue(Math.abs(count - previous) <= 1);
@@ -27,7 +27,7 @@ public class CrowdPopulationTest {
             }
             if (cap > 1) {
                 assertTrue(joined && left);
-                assertTrue("Turnover is subtle", changes < 250);
+                assertTrue("Turnover is subtle", changes < 500);
             }
         }
         assertEquals(3, population.update(21000, 3, 0, 4, random));

@@ -10,6 +10,30 @@ import java.util.*;
 
 public class FanChatManagerTest {
     @Test
+    public void recognitionMemorySurvivesChatResetButNewPeopleHaveTheirOwnMemory() {
+        com.celebritymode.TestScene scene = new com.celebritymode.TestScene();
+        scene.config.arrival = com.celebritymode.fan.ArrivalPace.INSTANT;
+        scene.tick();
+        List<com.celebritymode.fan.FanEntity> fans = scene.manager.getFans();
+        FanChatManager chat = new FanChatManager(new Random(18));
+        chat.configure(ChatFrequency.NORMAL, CustomQuoteMode.BUILT_IN_ONLY, "", 0);
+        chat.reactEvent(fans, 1, "recognition");
+        chat.tick(fans, 7);
+        assertTrue(fans.stream().anyMatch(f -> f.recognized));
+        for (com.celebritymode.fan.FanEntity fan : fans) fan.recognized = true;
+        chat.clear(fans);
+        chat.configure(ChatFrequency.NORMAL, CustomQuoteMode.BUILT_IN_ONLY, "", 8);
+        chat.reactEvent(fans, 9, "recognition");
+        for (com.celebritymode.fan.FanEntity fan : fans) assertNull(fan.overheadText);
+        com.celebritymode.fan.FanEntity newcomer = fans.get(0);
+        newcomer.recognized = false;
+        chat.reactEvent(fans, 10, "recognition");
+        assertNotNull(newcomer.overheadText);
+        assertTrue(newcomer.recognized);
+        scene.manager.cleanup();
+    }
+
+    @Test
     public void nearbyCompanionsHaveDelayedCoherentExchangesWithoutRecentTopicRepeats() {
         com.celebritymode.TestScene scene = new com.celebritymode.TestScene();
         scene.populate();
